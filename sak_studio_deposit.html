@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Book a Deposit — SAK Tattoo Studio</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@200;300;400&display=swap" rel="stylesheet">
+<script src="https://js.stripe.com/v3/"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+<style>
+:root {
+  --bg:       #c5c7b5;
+  --card:     #edeade;
+  --card2:    #e6e2d4;
+  --ink:      #2e2e2a;
+  --ink-mid:  #5a5a52;
+  --ink-soft: #8a8a7e;
+  --line:     rgba(46,46,42,0.15);
+  --line-med: rgba(46,46,42,0.25);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font-family:'Jost',sans-serif;font-weight:300;min-height:100vh}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 60% 80% at 10% 90%,rgba(100,110,80,.12) 0%,transparent 70%),radial-gradient(ellipse 40% 60% at 90% 10%,rgba(120,125,95,.08) 0%,transparent 60%);pointer-events:none;z-index:0}
+
+/* NAV */
+nav{display:flex;justify-content:space-between;align-items:center;padding:22px 48px;position:relative;z-index:10}
+.nav-logo{display:flex;align-items:center;gap:12px;text-decoration:none;color:var(--ink)}
+.logo-svg{width:36px;height:32px}
+.nav-brand{font-family:'Cormorant',serif;font-weight:300;font-size:.85rem;letter-spacing:.22em;text-transform:uppercase;line-height:1.3}
+.nav-links{display:flex;gap:32px;list-style:none}
+.nav-links a{font-family:'Jost',sans-serif;font-weight:300;font-size:.82rem;letter-spacing:.04em;color:var(--ink);text-decoration:none;opacity:.75;transition:opacity .2s}
+.nav-links a:hover{opacity:1}
+.nav-links a.active{opacity:1;font-weight:400}
+@media(max-width:640px){nav{padding:18px 24px}.nav-links{display:none}}
+
+/* HERO */
+.hero{position:relative;z-index:1;text-align:center;padding:48px 24px 40px}
+.hero-eyebrow{font-size:.7rem;font-weight:300;letter-spacing:.28em;text-transform:uppercase;color:var(--ink-mid);margin-bottom:20px}
+.hero h1{font-family:'Cormorant',serif;font-weight:300;font-size:clamp(2.8rem,8vw,5.5rem);letter-spacing:.04em;line-height:1.05;text-transform:uppercase;margin-bottom:18px}
+.hero-sub{font-size:.82rem;font-weight:300;color:var(--ink-mid);letter-spacing:.05em;max-width:420px;margin:0 auto;line-height:1.8}
+.hero-divider{width:40px;height:1px;background:var(--ink-soft);margin:28px auto;opacity:.5}
+
+/* FORM */
+.form-outer{position:relative;z-index:1;max-width:620px;margin:0 auto;padding:0 24px 80px}
+
+/* PROGRESS */
+.progress{display:flex;align-items:center;margin-bottom:36px;transition:opacity .4s}
+.prog-item{display:flex;align-items:center;gap:8px;flex:1}
+.prog-item:last-child{flex:none}
+.prog-num{width:26px;height:26px;border-radius:50%;border:1px solid var(--ink-soft);display:flex;align-items:center;justify-content:center;font-size:.68rem;color:var(--ink-soft);flex-shrink:0;transition:all .3s}
+.prog-num.done{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.prog-num.active{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.prog-label{font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);transition:color .3s;white-space:nowrap}
+.prog-label.active{color:var(--ink)}
+.prog-line{flex:1;height:1px;background:var(--line);margin:0 10px}
+.prog-line.done{background:rgba(46,46,42,.35)}
+@media(max-width:480px){.prog-label{display:none}.prog-line{margin:0 6px}}
+
+/* CARD */
+.card{background:var(--card);padding:40px}
+@media(max-width:500px){.card{padding:28px 22px}}
+.step{display:none}
+.step.active{display:block;animation:stepIn .35s ease}
+@keyframes stepIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.step-heading{font-family:'Cormorant',serif;font-weight:300;font-size:1.7rem;letter-spacing:.03em;margin-bottom:6px}
+.step-sub{font-size:.76rem;font-weight:300;color:var(--ink-soft);letter-spacing:.05em;margin-bottom:30px}
+
+/* FIELDS */
+.field{margin-bottom:22px}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:440px){.field-row{grid-template-columns:1fr}}
+label{display:block;font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-mid);margin-bottom:7px;font-weight:400}
+input[type=text],input[type=email],input[type=tel],textarea,select{width:100%;background:transparent;border:none;border-bottom:1px solid var(--line);padding:8px 0 10px;font-family:'Jost',sans-serif;font-weight:300;font-size:.9rem;color:var(--ink);outline:none;transition:border-color .2s;border-radius:0;appearance:none;-webkit-appearance:none}
+input:focus,textarea:focus,select:focus{border-bottom-color:var(--ink)}
+input::placeholder,textarea::placeholder{color:var(--ink-soft);font-weight:300;font-size:.85rem}
+select{cursor:pointer}
+select option{background:var(--card);color:var(--ink)}
+textarea{resize:none;line-height:1.7;min-height:88px}
+
+/* SIZE OPTIONS */
+.size-options{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px}
+.size-opt{background:transparent;border:1px solid var(--line);padding:16px 12px 14px;cursor:pointer;text-align:center;transition:all .2s}
+.size-opt:hover{border-color:rgba(46,46,42,.4)}
+.size-opt.selected{background:var(--ink);border-color:var(--ink)}
+.size-opt .s-name{display:block;font-family:'Cormorant',serif;font-size:1.05rem;font-weight:400;color:var(--ink);margin-bottom:3px;transition:color .2s}
+.size-opt .s-cm{display:block;font-size:.62rem;letter-spacing:.1em;color:var(--ink-soft);margin-bottom:6px;transition:color .2s}
+.size-opt .s-price{display:block;font-size:.7rem;color:var(--ink-mid);transition:color .2s}
+.size-opt.selected .s-name,.size-opt.selected .s-cm,.size-opt.selected .s-price{color:var(--card)}
+
+/* PHOTO UPLOAD */
+.photo-upload-area{border:1px dashed var(--line-med);padding:22px 16px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;position:relative}
+.photo-upload-area:hover{border-color:rgba(46,46,42,.5);background:rgba(46,46,42,.02)}
+.photo-upload-area.has-files{border-color:var(--ink)}
+.upload-icon{font-size:1.4rem;margin-bottom:8px;display:block}
+.upload-label-text{font-size:.75rem;color:var(--ink-mid);letter-spacing:.05em;line-height:1.6}
+.upload-label-text span{color:var(--ink);text-decoration:underline;cursor:pointer}
+.upload-hint{font-size:.62rem;color:var(--ink-soft);letter-spacing:.06em;margin-top:4px}
+#photo-input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.photo-previews{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.photo-thumb-wrap{position:relative;display:inline-block}
+.photo-thumb{width:60px;height:60px;object-fit:cover;border:1px solid var(--line)}
+.photo-remove{position:absolute;top:-6px;right:-6px;width:16px;height:16px;border-radius:50%;background:var(--ink);color:var(--card);font-size:.55rem;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1}
+
+/* CALENDAR */
+.cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.cal-month-label{font-family:'Cormorant',serif;font-weight:300;font-size:1.15rem;letter-spacing:.06em;color:var(--ink)}
+.cal-arrow{background:none;border:1px solid var(--line);width:28px;height:28px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.75rem;color:var(--ink-mid);transition:all .2s}
+.cal-arrow:hover{border-color:var(--ink);color:var(--ink)}
+.cal-arrow:disabled{opacity:.3;cursor:not-allowed}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.cal-dow{text-align:center;font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft);padding:4px 0 8px}
+.cal-day{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:.78rem;color:var(--ink-mid);border:1px solid transparent;transition:all .15s;position:relative}
+.cal-day.empty{pointer-events:none}
+.cal-day.closed{color:var(--line-med);pointer-events:none;text-decoration:line-through}
+.cal-day.available{cursor:pointer;color:var(--ink);border-color:var(--line)}
+.cal-day.available:hover{border-color:var(--ink);background:rgba(46,46,42,.04)}
+.cal-day.selected{background:var(--ink);color:var(--card);border-color:var(--ink);cursor:pointer}
+.cal-day.today-dot::after{content:'';position:absolute;bottom:3px;left:50%;transform:translateX(-50%);width:3px;height:3px;border-radius:50%;background:var(--ink-soft)}
+.cal-day.selected.today-dot::after{background:var(--card);opacity:.5}
+.cal-legend{display:flex;gap:16px;margin-top:12px;flex-wrap:wrap}
+.cal-legend-item{display:flex;align-items:center;gap:6px;font-size:.62rem;letter-spacing:.08em;color:var(--ink-soft)}
+.cal-legend-dot{width:10px;height:10px;flex-shrink:0}
+.cal-legend-dot.avail{border:1px solid var(--line-med)}
+.cal-legend-dot.sel{background:var(--ink)}
+.cal-legend-dot.closed{border:1px solid var(--line);opacity:.3}
+.cal-selected-display{margin-top:14px;padding:10px 14px;background:rgba(46,46,42,.05);font-size:.78rem;color:var(--ink-mid);letter-spacing:.04em;min-height:38px}
+.cal-selected-display strong{color:var(--ink);font-weight:400}
+
+/* TIME SLOTS */
+.time-slots{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:4px}
+@media(max-width:400px){.time-slots{grid-template-columns:1fr 1fr}}
+.time-slot{border:1px solid var(--line);padding:10px 6px;text-align:center;cursor:pointer;font-size:.72rem;color:var(--ink-mid);letter-spacing:.04em;transition:all .15s}
+.time-slot:hover{border-color:rgba(46,46,42,.4);color:var(--ink)}
+.time-slot.selected{background:var(--ink);border-color:var(--ink);color:var(--card)}
+.time-slot.unavail{opacity:.35;pointer-events:none;text-decoration:line-through}
+
+/* POLICY NOTE */
+.policy-note{font-size:.72rem;font-weight:300;color:var(--ink-soft);line-height:1.75;margin-bottom:24px;padding-left:14px;border-left:2px solid var(--line)}
+.policy-note strong{color:var(--ink-mid);font-weight:400}
+
+/* PAYMENT */
+.pay-methods{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:24px}
+.pay-tab{border:1px solid var(--line);padding:14px;cursor:pointer;display:flex;align-items:center;gap:10px;transition:all .2s;background:transparent;width:100%;text-align:left}
+.pay-tab:hover{border-color:rgba(46,46,42,.4)}
+.pay-tab.active{border-color:var(--ink);background:rgba(46,46,42,.05)}
+.pay-tab-icon{font-size:1.15rem;flex-shrink:0}
+.pay-tab-label{font-size:.78rem;color:var(--ink);display:block;font-weight:400;font-family:'Jost',sans-serif}
+.pay-tab-note{font-size:.62rem;color:var(--ink-soft);letter-spacing:.04em}
+.pay-panel{display:none;animation:stepIn .3s ease}
+.pay-panel.active{display:block}
+.stripe-wrap{border-bottom:1px solid var(--line);padding:10px 0 11px;margin-bottom:6px;transition:border-color .2s}
+.stripe-wrap.StripeElement--focus{border-bottom-color:var(--ink)}
+.stripe-error{font-size:.72rem;color:#b94444;min-height:18px;margin-top:6px;letter-spacing:.04em}
+
+/* QR */
+.qr-section{text-align:center;padding:8px 0 4px}
+.qr-amount-display{font-family:'Cormorant',serif;font-size:2rem;font-weight:300;letter-spacing:.04em;margin-bottom:4px}
+.qr-subtitle{font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:20px}
+#qr-canvas-wrap{display:inline-block;background:var(--card);padding:16px;border:1px solid var(--line);margin-bottom:16px}
+#qr-canvas-wrap canvas{display:block}
+.qr-id-line{font-size:.72rem;color:var(--ink-mid);letter-spacing:.05em;margin-bottom:6px}
+.qr-steps{font-size:.73rem;color:var(--ink-soft);line-height:1.8;text-align:left;padding:14px 16px;background:rgba(46,46,42,.04);margin-bottom:20px}
+.qr-steps strong{color:var(--ink-mid);font-weight:400;display:block;margin-bottom:3px}
+
+/* SUMMARY */
+.summary-block{background:var(--card2);padding:22px 24px;margin-bottom:24px}
+.sum-row{display:flex;justify-content:space-between;padding:6px 0;font-size:.8rem;color:var(--ink-mid);border-bottom:1px solid rgba(46,46,42,.07)}
+.sum-row:last-of-type{border-bottom:none}
+.sum-row strong{color:var(--ink);font-weight:400}
+.sum-total{display:flex;justify-content:space-between;padding:14px 0 0;margin-top:8px;border-top:1px solid rgba(46,46,42,.2);font-size:.9rem}
+.sum-total strong{font-weight:400;font-size:1.05rem}
+
+/* BUTTONS */
+.btn-row{display:flex;align-items:center;gap:16px;margin-top:10px}
+.btn-next{background:var(--ink);color:var(--card);border:none;padding:13px 36px;font-family:'Jost',sans-serif;font-weight:300;font-size:.72rem;letter-spacing:.2em;text-transform:uppercase;cursor:pointer;transition:opacity .2s}
+.btn-next:hover{opacity:.78}
+.btn-next:disabled{opacity:.45;cursor:not-allowed}
+.btn-back{background:none;border:none;font-family:'Jost',sans-serif;font-weight:300;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);cursor:pointer;padding:0;transition:color .2s}
+.btn-back:hover{color:var(--ink)}
+.btn-spinner{display:none;width:12px;height:12px;border:1.5px solid rgba(237,234,222,.4);border-top-color:var(--card);border-radius:50%;animation:spin .7s linear infinite;margin-left:10px;vertical-align:middle}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* SUCCESS */
+.success{display:none;text-align:center;padding:20px 0;animation:stepIn .5s ease}
+.success.show{display:block}
+.success-mark{width:52px;height:52px;border:1px solid rgba(46,46,42,.3);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 24px;font-size:1.2rem}
+.success h2{font-family:'Cormorant',serif;font-weight:300;font-size:2rem;letter-spacing:.04em;text-transform:uppercase;margin-bottom:10px}
+.success p{font-size:.8rem;color:var(--ink-mid);line-height:1.8;max-width:360px;margin:0 auto 20px}
+.ref-badge{display:inline-block;border:1px solid rgba(46,46,42,.25);padding:9px 28px;font-family:'Cormorant',serif;font-size:1.1rem;letter-spacing:.18em;margin-bottom:28px}
+.btn-whatsapp{display:inline-flex;align-items:center;gap:8px;background:var(--ink);color:var(--card);padding:13px 32px;font-family:'Jost',sans-serif;font-weight:300;font-size:.72rem;letter-spacing:.2em;text-transform:uppercase;text-decoration:none;transition:opacity .2s}
+.btn-whatsapp:hover{opacity:.78}
+
+/* FOOTER */
+.footer-note{text-align:center;padding:0 24px 48px;position:relative;z-index:1;font-size:.72rem;font-weight:300;color:var(--ink-soft);letter-spacing:.08em;line-height:1.8}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="https://sakstudio.art" class="nav-logo">
+    <svg class="logo-svg" viewBox="0 0 60 54" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <polygon points="30,2 58,50 2,50" fill="none" stroke="#2e2e2a" stroke-width="1.5"/>
+      <polygon points="30,14 50,44 10,44" fill="none" stroke="#2e2e2a" stroke-width="1.2"/>
+      <line x1="30" y1="44" x2="30" y2="54" stroke="#2e2e2a" stroke-width="1.2"/>
+      <line x1="22" y1="48" x2="38" y2="48" stroke="#2e2e2a" stroke-width="1.2"/>
+    </svg>
+    <span class="nav-brand">Sak<br>Studio</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="https://sakstudio.art">Home Page</a></li>
+    <li><a href="https://sakstudio.art/#why-us">Why us?</a></li>
+    <li><a href="https://sakstudio.art/#gallery">Tattoo Gallery</a></li>
+    <li><a href="https://sakstudio.art/#artists">Artists</a></li>
+    <li><a href="#" class="active">Book Deposit</a></li>
+  </ul>
+</nav>
+
+<div class="hero">
+  <p class="hero-eyebrow">SAK Tattoo Studio — Bangkok</p>
+  <h1>Book Your<br><em style="font-style:italic;font-weight:300;">Appointment</em></h1>
+  <div class="hero-divider"></div>
+  <p class="hero-sub">A 1,500 ฿ deposit reserves your slot and goes toward your final tattoo price. Song will confirm via WhatsApp within 12 hours.</p>
+</div>
+
+<div class="form-outer">
+
+  <div class="progress" id="progress">
+    <div class="prog-item">
+      <div class="prog-num active" id="pn0">1</div>
+      <span class="prog-label active" id="pl0">Details</span>
+    </div>
+    <div class="prog-line" id="pline0"></div>
+    <div class="prog-item">
+      <div class="prog-num" id="pn1">2</div>
+      <span class="prog-label" id="pl1">Tattoo</span>
+    </div>
+    <div class="prog-line" id="pline1"></div>
+    <div class="prog-item">
+      <div class="prog-num" id="pn2">3</div>
+      <span class="prog-label" id="pl2">Schedule</span>
+    </div>
+    <div class="prog-line" id="pline2"></div>
+    <div class="prog-item">
+      <div class="prog-num" id="pn3">4</div>
+      <span class="prog-label" id="pl3">Payment</span>
+    </div>
+  </div>
+
+  <div class="card" id="main-card">
+
+    <!-- STEP 1 -->
+    <div class="step active" id="step-0">
+      <h2 class="step-heading">Your Details</h2>
+      <p class="step-sub">So Song knows who to expect</p>
+      <div class="field-row">
+        <div class="field"><label>First Name *</label><input type="text" id="fname" placeholder="Alex"/></div>
+        <div class="field"><label>Last Name *</label><input type="text" id="lname" placeholder="Smith"/></div>
+      </div>
+      <div class="field"><label>Email Address *</label><input type="email" id="email" placeholder="alex@email.com"/></div>
+      <div class="field"><label>WhatsApp Number</label><input type="tel" id="phone" placeholder="+1 234 567 8900"/></div>
+      <div class="field">
+        <label>Where are you from?</label>
+        <select id="country">
+          <option value="">Country...</option>
+          <option>United States</option><option>United Kingdom</option><option>Australia</option>
+          <option>Germany</option><option>France</option><option>Canada</option>
+          <option>Netherlands</option><option>Sweden</option><option>Norway</option>
+          <option>Denmark</option><option>Switzerland</option><option>Japan</option>
+          <option>South Korea</option><option>Thailand</option><option>Other</option>
+        </select>
+      </div>
+      <div class="btn-row"><button class="btn-next" onclick="next(0)">Continue</button></div>
+    </div>
+
+    <!-- STEP 2 -->
+    <div class="step" id="step-1">
+      <h2 class="step-heading">Your Tattoo</h2>
+      <p class="step-sub">Tell Song what you have in mind</p>
+
+      <div class="field">
+        <label>Style</label>
+        <select id="style">
+          <option value="">Choose a style...</option>
+          <option>Fine Line / Minimalist</option>
+          <option>Black &amp; Grey Realism</option>
+          <option>Japanese Traditional</option>
+          <option>Neo Traditional</option>
+          <option>Geometric / Dotwork</option>
+          <option>Lettering / Script</option>
+          <option>Cover-Up</option>
+          <option>Color / Illustrative</option>
+          <option>Not sure — need a consultation</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Estimated Size *</label>
+        <div class="size-options">
+          <div class="size-opt" onclick="pickSize(this,'XS',1500)">
+            <span class="s-name">XS</span>
+            <span class="s-cm">1 – 3 cm</span>
+            <span class="s-price">1,500 – 3,000 ฿</span>
+          </div>
+          <div class="size-opt" onclick="pickSize(this,'S',1500)">
+            <span class="s-name">Small</span>
+            <span class="s-cm">4 – 7 cm</span>
+            <span class="s-price">3,000 – 6,000 ฿</span>
+          </div>
+          <div class="size-opt" onclick="pickSize(this,'M',1500)">
+            <span class="s-name">Medium</span>
+            <span class="s-cm">8 – 12 cm</span>
+            <span class="s-price">6,000 – 8,000 ฿</span>
+          </div>
+          <div class="size-opt" onclick="pickSize(this,'L',2000)">
+            <span class="s-name">Large</span>
+            <span class="s-cm">Full day session</span>
+            <span class="s-price">12,000 – 15,000 ฿</span>
+          </div>
+          <div class="size-opt" onclick="pickSize(this,'Unsure',1500)" style="grid-column:span 2;">
+            <span class="s-name">Unsure</span>
+            <span class="s-cm">Need advice</span>
+            <span class="s-price">Shop will contact you</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="field"><label>Placement</label><input type="text" id="placement" placeholder="e.g. inner forearm, behind ear, ankle..."/></div>
+
+      <div class="field">
+        <label>Your idea or reference</label>
+        <textarea id="idea" placeholder="Describe what you'd like — Song will respond with thoughts before your appointment."></textarea>
+      </div>
+
+      <div class="field">
+        <label>Reference photos <span style="font-size:.58rem;opacity:.7;text-transform:none;letter-spacing:0">(optional — up to 5 images)</span></label>
+        <div class="photo-upload-area" id="upload-area">
+          <input type="file" id="photo-input" accept="image/*" multiple onchange="handlePhotos(this)"/>
+          <span class="upload-icon">🖼</span>
+          <div class="upload-label-text">Drop photos here or <span>browse</span></div>
+          <div class="upload-hint">JPG, PNG, HEIC — max 5 MB each</div>
+        </div>
+        <div class="photo-previews" id="photo-previews"></div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn-next" onclick="next(1)">Continue</button>
+        <button class="btn-back" onclick="back(1)">← Back</button>
+      </div>
+    </div>
+
+    <!-- STEP 3 -->
+    <div class="step" id="step-2">
+      <h2 class="step-heading">Schedule</h2>
+      <p class="step-sub">Pick an available date</p>
+
+      <div class="field">
+        <label>Preferred Date *</label>
+        <div class="cal-nav">
+          <button class="cal-arrow" id="cal-prev" onclick="calShift(-1)">&#8249;</button>
+          <span class="cal-month-label" id="cal-month-label"></span>
+          <button class="cal-arrow" id="cal-next" onclick="calShift(1)">&#8250;</button>
+        </div>
+        <div class="cal-grid" id="cal-grid"></div>
+        <div class="cal-legend">
+          <div class="cal-legend-item"><div class="cal-legend-dot avail"></div>Available</div>
+          <div class="cal-legend-item"><div class="cal-legend-dot sel"></div>Selected</div>
+          <div class="cal-legend-item"><div class="cal-legend-dot closed"></div>Closed / booked</div>
+        </div>
+        <div class="cal-selected-display" id="cal-selected-display">No date selected yet</div>
+      </div>
+
+      <div class="field" id="time-field" style="display:none;">
+        <label>Preferred Time</label>
+        <div class="time-slots" id="time-slots"></div>
+      </div>
+
+      <div class="policy-note">
+        <strong>Deposit policy</strong><br>
+        Your deposit is deducted from the final price. Cancellations with 48+ hours notice receive a full credit toward a future booking. Under 48 hours, the deposit is retained. No-shows forfeit the deposit. Song will confirm your slot via WhatsApp within 12 hours.
+      </div>
+      <div class="btn-row">
+        <button class="btn-next" onclick="next(2)">Continue</button>
+        <button class="btn-back" onclick="back(2)">← Back</button>
+      </div>
+    </div>
+
+    <!-- STEP 4 -->
+    <div class="step" id="step-3">
+      <h2 class="step-heading">Deposit</h2>
+      <p class="step-sub">Review your booking and pay the deposit</p>
+
+      <div class="summary-block">
+        <div class="sum-row"><span>Tattoo size</span><strong id="s-size">—</strong></div>
+        <div class="sum-row"><span>Style</span><strong id="s-style">—</strong></div>
+        <div class="sum-row"><span>Date</span><strong id="s-date">—</strong></div>
+        <div class="sum-row"><span>Time</span><strong id="s-time">—</strong></div>
+        <div class="sum-total"><span>Deposit due</span><strong id="s-deposit">1,500 ฿</strong></div>
+      </div>
+
+      <div class="field">
+        <label>Payment method</label>
+        <div class="pay-methods">
+          <button class="pay-tab active" onclick="switchPay('card',this)">
+            <span class="pay-tab-icon">💳</span>
+            <div><span class="pay-tab-label">Card</span><span class="pay-tab-note">Visa · Mastercard · Amex</span></div>
+          </button>
+          <button class="pay-tab" onclick="switchPay('promptpay',this)">
+            <span class="pay-tab-icon">🇹🇭</span>
+            <div><span class="pay-tab-label">PromptPay</span><span class="pay-tab-note">Scan &amp; transfer (THB)</span></div>
+          </button>
+        </div>
+      </div>
+
+      <div class="pay-panel active" id="panel-card">
+        <div class="field" style="margin-bottom:16px;">
+          <label>Name on card</label>
+          <input type="text" id="card-name" placeholder="Alex Smith"/>
+        </div>
+        <div class="field">
+          <label>Card details</label>
+          <div class="stripe-wrap" id="stripe-element"></div>
+          <div class="stripe-error" id="stripe-error"></div>
+        </div>
+        <p style="font-size:.68rem;color:var(--ink-soft);line-height:1.6;margin-bottom:20px;letter-spacing:.03em;">
+          Secured by <strong style="font-weight:400;color:var(--ink-mid);">Stripe</strong>. SAK Tattoo Studio never stores your card details.
+        </p>
+        <div class="btn-row">
+          <button class="btn-next" id="pay-btn" onclick="payCard()">Pay deposit <span class="btn-spinner" id="pay-spinner"></span></button>
+          <button class="btn-back" onclick="back(3)">← Back</button>
+        </div>
+      </div>
+
+      <div class="pay-panel" id="panel-promptpay">
+        <div class="qr-section">
+          <div class="qr-amount-display" id="qr-amount-display">1,500 ฿</div>
+          <p class="qr-subtitle">Scan with any Thai banking app</p>
+          <div id="qr-canvas-wrap"><canvas id="qr-canvas"></canvas></div>
+          <div class="qr-id-line" id="qr-id-line">PromptPay ID: —</div>
+        </div>
+        <div class="qr-steps">
+          <strong>How to pay</strong>
+          1. Open your Thai banking app (KBank, SCB, Bangkok Bank…)<br>
+          2. Choose <em>Scan QR</em> or <em>PromptPay</em><br>
+          3. Scan the QR code above<br>
+          4. Confirm the amount matches <span id="qr-step-amt">1,500 ฿</span><br>
+          5. Complete transfer and take a screenshot
+        </div>
+        <div class="btn-row">
+          <button class="btn-next" id="pp-btn" onclick="submitPromptPay()">I've paid — confirm <span class="btn-spinner" id="pp-spinner"></span></button>
+          <button class="btn-back" onclick="back(3)">← Back</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUCCESS -->
+    <div class="success" id="success">
+      <div class="success-mark">✓</div>
+      <h2>Booking Requested</h2>
+      <p id="success-msg">Song will confirm your slot and payment details via WhatsApp within 12 hours.</p>
+      <div class="ref-badge" id="ref-display">SAK-000000</div><br>
+      <a href="#" class="btn-whatsapp" id="wa-link" target="_blank">Message Song on WhatsApp</a>
+      <p style="margin-top:24px;font-size:.7rem;color:var(--ink-soft);">247 S Sathon Rd, Yan Nawa, Bangkok · 3 min from BTS Saphan Taksin</p>
+    </div>
+
+  </div>
+</div>
+
+<div class="footer-note">
+  Good tattoo brings a good day<br>
+  <span style="letter-spacing:.02em;opacity:.6;">SAK Tattoo Studio · 247 S Sathon Rd, Bangkok · BTS Saphan Taksin Exit 4</span>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════
+   ❶  CFG — fill in before deploying to sakstudio.art
+   ═══════════════════════════════════════════════════════════ */
+const CFG = {
+  stripeKey:  'pk_test_51TKBUyAHF3VdACZsRsvT0Ts0htRvWktF0bLagmrrmdRPWQJfkS2UIvtLzbqGu2EhTPAGkv6wpa8eAXqIvFzPw5iw00LU8lVqNZ',   // Stripe dashboard → Developers → API keys
+    promptPayId:       '0612298996',    // Your phone or 13-digit ID/tax ID  
+    emailjsPublicKey:  'HS5XYBT3XgT4JVW90',   // emailjs.com → Account → Public key
+    emailjsServiceId:  'service_somqexg',     // EmailJS → Email Services
+    emailjsTemplateId: 'template_klpy678',    // EmailJS → Email Templates
+    whatsappNumber:    '66612298996',          // International format, no +
+  depositMap: { XS:1500, S:1500, M:1500, L:2000, Unsure:1500 },
+
+  /* Which time slots open per weekday (0=Sun … 6=Sat). null = closed */
+  openHours: {
+    0: ['11:00–13:00','13:00–16:00','16:00–18:00'],
+    1: ['11:00–13:00','13:00–16:00','16:00–18:00'],
+    2: ['11:00–13:00','13:00–16:00','16:00–18:00'],
+    3: ['11:00–13:00','13:00–16:00','16:00–18:00'],
+    4: ['11:00–13:00','13:00–16:00','16:00–18:00'],
+    5: ['11:00–13:00','13:00–16:00','16:00–18:00'],
+    6: ['11:00–13:00','13:00–16:00','16:00-18:00'],
+  },
+
+  /* Block entire dates: 'YYYY-MM-DD' */
+  blockedDates: [],
+
+  /* Block specific slots: { 'YYYY-MM-DD': ['11:00–13:00'] } */
+  bookedSlots: {},
+};
+/* ═══════════════════════════════════════════════════════════ */
+
+const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const DOW_SHORT   = ['Su','Mo','Tu','We','Th','Fr','Sa'];
+const DOW_LONG    = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+
+let selSize='' , selDeposit=1500, selPay='card';
+let selDate=null, selTime='';
+let uploadedFiles=[];
+let calYear, calMonth;
+
+/* EmailJS */
+emailjs.init(CFG.emailjsPublicKey);
+
+/* Stripe */
+let stripe, cardElement;
+function initStripe(){
+  if(stripe) return;
+  try{
+    stripe=Stripe(CFG.stripeKey);
+    const elems=stripe.elements({fonts:[{cssSrc:'https://fonts.googleapis.com/css2?family=Jost:wght@300&display=swap'}]});
+    cardElement=elems.create('card',{
+      style:{base:{fontFamily:"'Jost',sans-serif",fontWeight:'300',fontSize:'15px',color:'#2e2e2a','::placeholder':{color:'#8a8a7e'},iconColor:'#5a5a52'},invalid:{color:'#b94444',iconColor:'#b94444'}},
+      hidePostalCode:true
+    });
+    cardElement.mount('#stripe-element');
+    cardElement.on('change',e=>{ document.getElementById('stripe-error').textContent=e.error?e.error.message:''; });
+    cardElement.on('focus',()=>document.getElementById('stripe-element').classList.add('StripeElement--focus'));
+    cardElement.on('blur', ()=>document.getElementById('stripe-element').classList.remove('StripeElement--focus'));
+  }catch(e){ console.warn('Stripe init failed — check CFG.stripeKey'); }
+}
+
+/* ── PROMPTPAY QR — self-contained EMVCo generator ── */
+function ppCRC16(str){
+  let crc=0xFFFF;
+  for(let i=0;i<str.length;i++){
+    crc^=str.charCodeAt(i)<<8;
+    for(let j=0;j<8;j++) crc=(crc&0x8000)?(crc<<1)^0x1021:(crc<<1);
+  }
+  return ((crc&0xFFFF).toString(16).toUpperCase().padStart(4,'0'));
+}
+function ppField(id,value){
+  const len=String(value.length).padStart(2,'0');
+  return id+len+value;
+}
+function ppNormalisePhone(raw){
+  /* Convert 08XXXXXXXX → 0066XXXXXXXX (PromptPay format) */
+  let n=raw.replace(/\D/g,'');
+  if(n.startsWith('0')) n='66'+n.slice(1);
+  return '0066'+n.slice(2); /* pad to 0066XXXXXXXXX */
+}
+function buildPromptPayPayload(phoneNumber, amountTHB){
+  const phone = ppNormalisePhone(phoneNumber);
+  const merchantInfo = ppField('00','A000000677010111') + ppField('01', phone);
+  let payload =
+    ppField('00','01') +                          // Payload format indicator
+    ppField('01','12') +                          // Point of initiation — dynamic
+    ppField('29', merchantInfo) +                 // Merchant account info
+    ppField('53','764') +                         // Currency — THB
+    ppField('54', amountTHB.toFixed(2)) +         // Amount
+    ppField('58','TH') +                          // Country
+    '6304';                                       // CRC placeholder
+  return payload + ppCRC16(payload);
+}
+function buildPromptPayQR(){
+  try{
+    const payload = buildPromptPayPayload(CFG.promptPayId, selDeposit);
+    QRCode.toCanvas(document.getElementById('qr-canvas'), payload, {
+      width:220, margin:1, color:{dark:'#2e2e2a', light:'#edeade'}
+    }, err=>{ if(err) console.error('QR render error:',err); });
+    document.getElementById('qr-id-line').textContent = 'PromptPay: '+CFG.promptPayId+' (SCB)';
+    document.getElementById('qr-amount-display').textContent = selDeposit.toLocaleString()+' ฿';
+    document.getElementById('qr-step-amt').textContent = selDeposit.toLocaleString()+' ฿';
+  }catch(e){ console.error('QR build error:',e); }
+}
+
+/* ── CALENDAR ── */
+function calInit(){
+  const now=new Date(); calYear=now.getFullYear(); calMonth=now.getMonth();
+  renderCal();
+}
+function calShift(dir){
+  calMonth+=dir;
+  if(calMonth>11){calMonth=0;calYear++;}
+  if(calMonth<0){calMonth=11;calYear--;}
+  renderCal();
+}
+function fmtDate(d){
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function renderCal(){
+  const now=new Date(); now.setHours(0,0,0,0);
+  document.getElementById('cal-month-label').textContent=MONTH_NAMES[calMonth]+' '+calYear;
+  const isPast=(calYear<now.getFullYear())||(calYear===now.getFullYear()&&calMonth<now.getMonth());
+  document.getElementById('cal-prev').disabled=isPast;
+
+  const grid=document.getElementById('cal-grid'); grid.innerHTML='';
+  DOW_SHORT.forEach(d=>{ const h=document.createElement('div'); h.className='cal-dow'; h.textContent=d; grid.appendChild(h); });
+
+  const firstDay=new Date(calYear,calMonth,1).getDay();
+  const daysInMonth=new Date(calYear,calMonth+1,0).getDate();
+  for(let i=0;i<firstDay;i++){ const e=document.createElement('div'); e.className='cal-day empty'; grid.appendChild(e); }
+
+  for(let d=1;d<=daysInMonth;d++){
+    const date=new Date(calYear,calMonth,d);
+    const cell=document.createElement('div'); cell.textContent=d;
+    const dateStr=fmtDate(date); const dow=date.getDay();
+    const isToday=date.getTime()===now.getTime();
+    const isPast=date<now;
+    const isBlocked=CFG.blockedDates.includes(dateStr);
+    const isClosed=CFG.openHours[dow]===null;
+    const isSelected=selDate&&fmtDate(selDate)===dateStr;
+    if(isToday) cell.classList.add('today-dot');
+    if(isPast||isBlocked||isClosed){
+      cell.className='cal-day closed'; if(isToday) cell.classList.add('today-dot');
+    } else if(isSelected){
+      cell.className='cal-day selected'; if(isToday) cell.classList.add('today-dot');
+    } else {
+      cell.className='cal-day available'; if(isToday) cell.classList.add('today-dot');
+      cell.onclick=()=>pickDate(date);
+    }
+    grid.appendChild(cell);
+  }
+}
+function pickDate(date){
+  selDate=date; selTime=''; renderCal();
+  const nice=DOW_LONG[date.getDay()]+', '+MONTH_NAMES[date.getMonth()]+' '+date.getDate()+' '+date.getFullYear();
+  document.getElementById('cal-selected-display').innerHTML='Selected: <strong>'+nice+'</strong>';
+  renderTimeSlots(date);
+}
+function renderTimeSlots(date){
+  const dateStr=fmtDate(date); const dow=date.getDay();
+  const allSlots=CFG.openHours[dow]||[];
+  const booked=CFG.bookedSlots[dateStr]||[];
+  const wrap=document.getElementById('time-slots'); wrap.innerHTML='';
+  if(!allSlots.length){ document.getElementById('time-field').style.display='none'; return; }
+  document.getElementById('time-field').style.display='block';
+  allSlots.forEach(slot=>{
+    const el=document.createElement('div'); el.className='time-slot'; el.textContent=slot;
+    if(booked.includes(slot)){ el.classList.add('unavail'); }
+    else{ el.onclick=()=>{ document.querySelectorAll('.time-slot').forEach(s=>s.classList.remove('selected')); el.classList.add('selected'); selTime=slot; }; }
+    wrap.appendChild(el);
+  });
+}
+
+/* ── PHOTO UPLOAD ── */
+function handlePhotos(input){
+  const files=Array.from(input.files);
+  const remaining=5-uploadedFiles.length;
+  files.slice(0,remaining).forEach(f=>{
+    if(f.size>5*1024*1024){ alert(f.name+' is over 5 MB and was skipped.'); return; }
+    const idx=uploadedFiles.push(f)-1;
+    const reader=new FileReader();
+    reader.onload=e=>addThumb(e.target.result,idx);
+    reader.readAsDataURL(f);
+  });
+  if(uploadedFiles.length>=5) document.getElementById('upload-area').classList.add('has-files');
+  input.value='';
+}
+function addThumb(src,idx){
+  const wrap=document.createElement('div'); wrap.className='photo-thumb-wrap'; wrap.dataset.idx=idx;
+  const img=document.createElement('img'); img.className='photo-thumb'; img.src=src;
+  const btn=document.createElement('button'); btn.className='photo-remove'; btn.textContent='✕';
+  btn.onclick=()=>removePhoto(idx);
+  wrap.appendChild(img); wrap.appendChild(btn);
+  document.getElementById('photo-previews').appendChild(wrap);
+}
+function removePhoto(idx){
+  uploadedFiles.splice(idx,1);
+  const prev=document.getElementById('photo-previews'); prev.innerHTML='';
+  uploadedFiles.forEach((f,i)=>{ const r=new FileReader(); r.onload=e=>addThumb(e.target.result,i); r.readAsDataURL(f); });
+  if(uploadedFiles.length<5) document.getElementById('upload-area').classList.remove('has-files');
+}
+
+/* ── PROGRESS & NAVIGATION ── */
+function updateProgress(active){
+  for(let i=0;i<4;i++){
+    const num=document.getElementById('pn'+i), lbl=document.getElementById('pl'+i);
+    num.className='prog-num'; lbl.className='prog-label';
+    if(i<active){num.classList.add('done');num.textContent='✓';}
+    else if(i===active){num.classList.add('active');num.textContent=i+1;lbl.classList.add('active');}
+    else{num.textContent=i+1;}
+  }
+  for(let i=0;i<3;i++) document.getElementById('pline'+i).className='prog-line'+(i<active?' done':'');
+}
+function showStep(n){
+  document.querySelectorAll('.step').forEach(s=>s.classList.remove('active'));
+  document.getElementById('step-'+n).classList.add('active');
+  updateProgress(n);
+  window.scrollTo({top:0,behavior:'smooth'});
+  if(n===2) calInit();
+  if(n===3){ fillSummary(); initStripe(); if(selPay==='promptpay') buildPromptPayQR(); }
+}
+function next(from){
+  if(from===0){ if(!document.getElementById('fname').value.trim()||!document.getElementById('email').value.trim()){alert('Please enter your name and email.');return;} }
+  if(from===1){ if(!document.getElementById('style').value){alert('Please select a tattoo style.');return;} if(!selSize){alert('Please select an estimated size.');return;} }
+  if(from===2){ if(!selDate){alert('Please select a date from the calendar.');return;} }
+  showStep(from+1);
+}
+function back(from){ showStep(from-1); }
+function pickSize(el,size,dep){
+  document.querySelectorAll('.size-opt').forEach(o=>o.classList.remove('selected'));
+  el.classList.add('selected'); selSize=size; selDeposit=CFG.depositMap[size]||dep;
+}
+function switchPay(method,el){
+  selPay=method;
+  document.querySelectorAll('.pay-tab').forEach(t=>t.classList.remove('active')); el.classList.add('active');
+  document.querySelectorAll('.pay-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('panel-'+method).classList.add('active');
+  if(method==='promptpay') buildPromptPayQR();
+  if(method==='card') initStripe();
+}
+
+function fillSummary(){
+  const sizeLabels={XS:'XS (1–3 cm)',S:'Small (4–7 cm)',M:'Medium (8–12 cm)',L:'Large (full day)',Unsure:'Unsure — consult'};
+  const dateStr=selDate?DOW_LONG[selDate.getDay()]+' '+selDate.getDate()+' '+MONTH_NAMES[selDate.getMonth()]+' '+selDate.getFullYear():'—';
+  document.getElementById('s-size').textContent=sizeLabels[selSize]||'—';
+  document.getElementById('s-style').textContent=document.getElementById('style').value||'—';
+  document.getElementById('s-date').textContent=dateStr;
+  document.getElementById('s-time').textContent=selTime||'Any available';
+  document.getElementById('s-deposit').textContent=selDeposit.toLocaleString()+' ฿';
+}
+
+function formData(){
+  return{
+    fname:document.getElementById('fname').value.trim(),
+    lname:document.getElementById('lname').value.trim(),
+    email:document.getElementById('email').value.trim(),
+    phone:document.getElementById('phone').value.trim(),
+    country:document.getElementById('country').value,
+    style:document.getElementById('style').value,
+    size:selSize, deposit:selDeposit,
+    placement:document.getElementById('placement').value.trim(),
+    idea:document.getElementById('idea').value.trim(),
+    date:selDate?fmtDate(selDate):'—',
+    time:selTime||'Any available',
+    photoCount:uploadedFiles.length,
+    payMethod:selPay,
+  };
+}
+
+function makeRef(){ return 'SAK-'+Math.random().toString(36).substr(2,6).toUpperCase(); }
+
+function sendEmail(ref,data,payStatus){
+  return emailjs.send(CFG.emailjsServiceId,CFG.emailjsTemplateId,{
+    ref,
+    customer_name:data.fname+' '+data.lname,
+    customer_email:data.email,
+    customer_phone:data.phone||'—',
+    country:data.country||'—',
+    style:data.style, size:data.size,
+    placement:data.placement||'—',
+    idea:data.idea||'—',
+    date:data.date, time:data.time,
+    deposit:data.deposit.toLocaleString()+' THB',
+    photos:data.photoCount>0?data.photoCount+' photo(s) attached by customer':'None',
+    pay_method:payStatus,
+  }).catch(e=>console.warn('EmailJS:',e));
+}
+
+function showSuccess(ref,data,msgOverride){
+  document.getElementById('ref-display').textContent=ref;
+  if(msgOverride) document.getElementById('success-msg').textContent=msgOverride;
+  const waMsg=encodeURIComponent('Hi Song! Booking '+ref+' submitted.\n\nName: '+data.fname+' '+data.lname+'\nSize: '+data.size+'\nStyle: '+data.style+'\nDate: '+data.date+'  Time: '+data.time+'\nPayment: '+data.payMethod+'\nIdea: '+(data.idea||'—')+'\n\nLooking forward to it!');
+  document.getElementById('wa-link').href='https://wa.me/'+CFG.whatsappNumber+'?text='+waMsg;
+  document.querySelectorAll('.step').forEach(s=>s.classList.remove('active'));
+  document.getElementById('progress').style.opacity='0';
+  document.getElementById('success').classList.add('show');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+async function payCard(){
+  const data=formData(); const btn=document.getElementById('pay-btn'); const spin=document.getElementById('pay-spinner');
+  if(!stripe||!cardElement){alert('Stripe not loaded. Check CFG.stripeKey.');return;}
+  btn.disabled=true; spin.style.display='inline-block'; document.getElementById('stripe-error').textContent='';
+  try{
+    const{paymentMethod,error}=await stripe.createPaymentMethod({
+      type:'card',card:cardElement,
+      billing_details:{name:document.getElementById('card-name').value||data.fname+' '+data.lname,email:data.email}
+    });
+    if(error){document.getElementById('stripe-error').textContent=error.message;return;}
+    const ref=makeRef();
+    await sendEmail(ref,data,'Card (Stripe PM: '+paymentMethod.id+')');
+    showSuccess(ref,data,'Card secured with Stripe. Song will confirm your slot and charge the deposit within 12 hours.');
+  }catch(e){document.getElementById('stripe-error').textContent='Payment error — please try again.';console.error(e);}
+  finally{btn.disabled=false;spin.style.display='none';}
+}
+
+async function submitPromptPay(){
+  const data=formData(); const btn=document.getElementById('pp-btn'); const spin=document.getElementById('pp-spinner');
+  btn.disabled=true; spin.style.display='inline-block';
+  try{
+    const ref=makeRef();
+    await sendEmail(ref,data,'PromptPay QR — awaiting screenshot');
+    showSuccess(ref,data,'Transfer '+data.deposit.toLocaleString()+' ฿ via the QR code, then send Song a screenshot on WhatsApp to confirm your slot.');
+  }catch(e){const ref=makeRef();showSuccess(ref,data);}
+  finally{btn.disabled=false;spin.style.display='none';}
+}
+</script>
+</body>
+</html>
