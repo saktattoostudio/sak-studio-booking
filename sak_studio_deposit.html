@@ -7,7 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@200;300;400&display=swap" rel="stylesheet">
 <script src="https://js.stripe.com/v3/"></script>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+
 <style>
 :root {
   --bg:       #c5c7b5;
@@ -436,7 +436,7 @@ textarea{resize:none;line-height:1.7;min-height:88px}
         <div class="qr-section">
           <div class="qr-amount-display" id="qr-amount-display">1,500 ฿</div>
           <p class="qr-subtitle">Scan with any Thai banking app</p>
-          <div id="qr-canvas-wrap"><canvas id="qr-canvas"></canvas></div>
+          <div id="qr-canvas-wrap"><img src="qr_promptpay.JPG" width="220" height="320" alt="PromptPay QR"/></div>
           <div class="qr-id-line" id="qr-id-line">PromptPay ID: —</div>
         </div>
         <div class="qr-steps">
@@ -477,23 +477,23 @@ textarea{resize:none;line-height:1.7;min-height:88px}
    ❶  CFG — fill in before deploying to sakstudio.art
    ═══════════════════════════════════════════════════════════ */
 const CFG = {
-  stripeKey:  'pk_test_51TKBUyAHF3VdACZsRsvT0Ts0htRvWktF0bLagmrrmdRPWQJfkS2UIvtLzbqGu2EhTPAGkv6wpa8eAXqIvFzPw5iw00LU8lVqNZ',   // Stripe dashboard → Developers → API keys
-    promptPayId:       '0612298996',    // Your phone or 13-digit ID/tax ID  
-    emailjsPublicKey:  'HS5XYBT3XgT4JVW90',   // emailjs.com → Account → Public key
-    emailjsServiceId:  'service_somqexg',     // EmailJS → Email Services
-    emailjsTemplateId: 'template_klpy678',    // EmailJS → Email Templates
-    whatsappNumber:    '66612298996',          // International format, no +
+  stripeKey:         'pk_test_REPLACE_WITH_YOUR_STRIPE_PUBLISHABLE_KEY',
+  promptPayId:       '0612298996',  // Song's SCB PromptPay number
+  emailjsPublicKey:  'REPLACE_YOUR_EMAILJS_PUBLIC_KEY',
+  emailjsServiceId:  'REPLACE_YOUR_SERVICE_ID',
+  emailjsTemplateId: 'REPLACE_YOUR_TEMPLATE_ID',
+  whatsappNumber:    '66XXXXXXXXX',
   depositMap: { XS:1500, S:1500, M:1500, L:2000, Unsure:1500 },
 
   /* Which time slots open per weekday (0=Sun … 6=Sat). null = closed */
   openHours: {
-    0: ['11:00–13:00','13:00–16:00','16:00–18:00'],
+    0: null,
     1: ['11:00–13:00','13:00–16:00','16:00–18:00'],
     2: ['11:00–13:00','13:00–16:00','16:00–18:00'],
     3: ['11:00–13:00','13:00–16:00','16:00–18:00'],
     4: ['11:00–13:00','13:00–16:00','16:00–18:00'],
     5: ['11:00–13:00','13:00–16:00','16:00–18:00'],
-    6: ['11:00–13:00','13:00–16:00','16:00-18:00'],
+    6: ['11:00–13:00','13:00–16:00'],
   },
 
   /* Block entire dates: 'YYYY-MM-DD' */
@@ -534,47 +534,37 @@ function initStripe(){
   }catch(e){ console.warn('Stripe init failed — check CFG.stripeKey'); }
 }
 
-/* ── PROMPTPAY QR — self-contained EMVCo generator ── */
+/* ── PROMPTPAY QR — uses Google Charts API, no library needed ── */
 function ppCRC16(str){
-  let crc=0xFFFF;
-  for(let i=0;i<str.length;i++){
+  var crc=0xFFFF;
+  for(var i=0;i<str.length;i++){
     crc^=str.charCodeAt(i)<<8;
-    for(let j=0;j<8;j++) crc=(crc&0x8000)?(crc<<1)^0x1021:(crc<<1);
+    for(var j=0;j<8;j++) crc=(crc&0x8000)?(crc<<1)^0x1021:(crc<<1);
   }
   return ((crc&0xFFFF).toString(16).toUpperCase().padStart(4,'0'));
 }
 function ppField(id,value){
-  const len=String(value.length).padStart(2,'0');
-  return id+len+value;
+  return id+String(value.length).padStart(2,'0')+value;
 }
-function ppNormalisePhone(raw){
-  /* Convert 08XXXXXXXX → 0066XXXXXXXX (PromptPay format) */
-  let n=raw.replace(/\D/g,'');
+function buildPromptPayPayload(phone, amount){
+  var n=phone.replace(/\D/g,'');
   if(n.startsWith('0')) n='66'+n.slice(1);
-  return '0066'+n.slice(2); /* pad to 0066XXXXXXXXX */
-}
-function buildPromptPayPayload(phoneNumber, amountTHB){
-  const phone = ppNormalisePhone(phoneNumber);
-  const merchantInfo = ppField('00','A000000677010111') + ppField('01', phone);
-  let payload =
-    ppField('00','01') +                          // Payload format indicator
-    ppField('01','12') +                          // Point of initiation — dynamic
-    ppField('29', merchantInfo) +                 // Merchant account info
-    ppField('53','764') +                         // Currency — THB
-    ppField('54', amountTHB.toFixed(2)) +         // Amount
-    ppField('58','TH') +                          // Country
-    '6304';                                       // CRC placeholder
-  return payload + ppCRC16(payload);
+  var target='0066'+n.slice(2);
+  var merchant=ppField('00','A000000677010111')+ppField('01',target);
+  var payload=ppField('00','01')+ppField('01','12')+ppField('29',merchant)+ppField('53','764')+ppField('54',amount.toFixed(2))+ppField('58','TH')+'6304';
+  return payload+ppCRC16(payload);
 }
 function buildPromptPayQR(){
   try{
-    const payload = buildPromptPayPayload(CFG.promptPayId, selDeposit);
-    QRCode.toCanvas(document.getElementById('qr-canvas'), payload, {
-      width:220, margin:1, color:{dark:'#2e2e2a', light:'#edeade'}
-    }, err=>{ if(err) console.error('QR render error:',err); });
-    document.getElementById('qr-id-line').textContent = 'PromptPay: '+CFG.promptPayId+' (SCB)';
-    document.getElementById('qr-amount-display').textContent = selDeposit.toLocaleString()+' ฿';
-    document.getElementById('qr-step-amt').textContent = selDeposit.toLocaleString()+' ฿';
+    var payload=buildPromptPayPayload(CFG.promptPayId, selDeposit);
+    var encoded=encodeURIComponent(payload);
+    var url='https://chart.googleapis.com/chart?cht=qr&chs=220x220&chl='+encoded+'&choe=UTF-8';
+    var img=document.getElementById('qr-img');
+    img.src=url;
+    img.style.display='block';
+    document.getElementById('qr-id-line').textContent='PromptPay: '+CFG.promptPayId+' (SCB)';
+    document.getElementById('qr-amount-display').textContent=selDeposit.toLocaleString()+' ฿';
+    document.getElementById('qr-step-amt').textContent=selDeposit.toLocaleString()+' ฿';
   }catch(e){ console.error('QR build error:',e); }
 }
 
