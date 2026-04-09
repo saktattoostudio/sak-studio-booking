@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Book a Deposit — SAK Tattoo Studio</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@200;300;400&display=swap" rel="stylesheet">
-<script src="https://js.stripe.com/v3/"></script>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 
 <style>
@@ -414,20 +413,20 @@ textarea{resize:none;line-height:1.7;min-height:88px}
       </div>
 
       <div class="pay-panel active" id="panel-card">
-        <div class="field" style="margin-bottom:16px;">
-          <label>Name on card</label>
-          <input type="text" id="card-name" placeholder="Alex Smith"/>
+        <div style="background:rgba(46,46,42,0.04);padding:20px;margin-bottom:20px;">
+          <p style="font-size:0.78rem;color:var(--ink-mid);line-height:1.8;margin-bottom:16px;">
+            You will be taken to <strong style="color:var(--ink);font-weight:400;">Stripe's secure checkout</strong> to pay your deposit. After payment, you'll be redirected back automatically.
+          </p>
+          <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+            <span style="font-size:0.65rem;letter-spacing:0.1em;color:var(--ink-soft);text-transform:uppercase;">Accepted cards</span>
+            <span style="font-size:0.8rem;color:var(--ink-mid);">Visa · Mastercard · Amex · UnionPay</span>
+          </div>
         </div>
-        <div class="field">
-          <label>Card details</label>
-          <div class="stripe-wrap" id="stripe-element"></div>
-          <div class="stripe-error" id="stripe-error"></div>
-        </div>
-        <p style="font-size:.68rem;color:var(--ink-soft);line-height:1.6;margin-bottom:20px;letter-spacing:.03em;">
-          Secured by <strong style="font-weight:400;color:var(--ink-mid);">Stripe</strong>. SAK Tattoo Studio never stores your card details.
+        <p style="font-size:0.68rem;color:var(--ink-soft);line-height:1.6;margin-bottom:20px;letter-spacing:.03em;">
+          🔒 Payments processed securely by <strong style="font-weight:400;color:var(--ink-mid);">Stripe</strong>. SAK Tattoo Studio never stores your card details.
         </p>
         <div class="btn-row">
-          <button class="btn-next" id="pay-btn" onclick="payCard()">Pay deposit <span class="btn-spinner" id="pay-spinner"></span></button>
+          <button class="btn-next" id="pay-btn" onclick="goToStripe()">Pay with card →</button>
           <button class="btn-back" onclick="back(3)">← Back</button>
         </div>
       </div>
@@ -445,10 +444,25 @@ textarea{resize:none;line-height:1.7;min-height:88px}
           2. Choose <em>Scan QR</em> or <em>PromptPay</em><br>
           3. Scan the QR code above<br>
           4. Confirm the amount matches <span id="qr-step-amt">1,500 ฿</span><br>
-          5. Complete transfer and take a screenshot
+          5. Complete transfer → take a screenshot → upload below
         </div>
+
+        <div class="field" style="margin-bottom:20px;">
+          <label>Upload payment screenshot *</label>
+          <div class="photo-upload-area" id="payslip-area" style="padding:18px;">
+            <input type="file" id="payslip-input" accept="image/*" onchange="handlePayslip(this)" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;"/>
+            <span class="upload-icon" id="payslip-icon">📱</span>
+            <div class="upload-label-text" id="payslip-label-text">Screenshot of your transfer confirmation<br><span>Tap to upload</span></div>
+            <div class="upload-hint">JPG or PNG — max 5 MB</div>
+          </div>
+          <div id="payslip-preview-wrap" style="margin-top:10px;position:relative;display:none;">
+            <img id="payslip-preview" style="width:100%;max-height:220px;object-fit:contain;border:1px solid var(--line);display:block;"/>
+            <button onclick="removePayslip()" style="position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:50%;background:var(--ink);color:var(--card);border:none;cursor:pointer;font-size:0.65rem;">✕</button>
+          </div>
+        </div>
+
         <div class="btn-row">
-          <button class="btn-next" id="pp-btn" onclick="submitPromptPay()">I've paid — confirm <span class="btn-spinner" id="pp-spinner"></span></button>
+          <button class="btn-next" id="pp-btn" onclick="submitPromptPay()">Confirm booking <span class="btn-spinner" id="pp-spinner"></span></button>
           <button class="btn-back" onclick="back(3)">← Back</button>
         </div>
       </div>
@@ -477,23 +491,31 @@ textarea{resize:none;line-height:1.7;min-height:88px}
    ❶  CFG — fill in before deploying to sakstudio.art
    ═══════════════════════════════════════════════════════════ */
 const CFG = {
-  stripeKey:         'pk_test_REPLACE_WITH_YOUR_STRIPE_PUBLISHABLE_KEY',
-  promptPayId:       '0612298996',  // Song's SCB PromptPay number
-  emailjsPublicKey:  'REPLACE_YOUR_EMAILJS_PUBLIC_KEY',
-  emailjsServiceId:  'REPLACE_YOUR_SERVICE_ID',
-  emailjsTemplateId: 'REPLACE_YOUR_TEMPLATE_ID',
-  whatsappNumber:    '66XXXXXXXXX',
+  /* Stripe Payment Link — create at dashboard.stripe.com → Payment Links
+     Set product: SAK Tattoo Deposit, price 1500 THB
+     Copy the link e.g. https://buy.stripe.com/xxxxxxxx              */
+  stripePaymentLink: 'https://buy.stripe.com/bJe7sK0AM4hU1qogy4f3a00',
+  promptPayId:       '0612298996',    // Your phone or 13-digit ID/tax ID  
+  emailjsPublicKey:  'HS5XYBT3XgT4JVW90',   // emailjs.com → Account → Public key
+  emailjsServiceId:  'service_somqexg',     // EmailJS → Email Services
+  emailjsTemplateId: 'template_klpy678',    // EmailJS → Email Templates
+  whatsappNumber:    '66612298996',          // International format, no +
   depositMap: { XS:1500, S:1500, M:1500, L:2000, Unsure:1500 },
+
+  /* ImgBB — free image hosting for payslip uploads
+     Sign up free at api.imgbb.com → get your API key
+     Free plan = unlimited uploads                        */
+  imgbbKey: 'REPLACE_YOUR_IMGBB_API_KEY',
 
   /* Which time slots open per weekday (0=Sun … 6=Sat). null = closed */
   openHours: {
-    0: null,
+    0: ['11:00–13:00','13:00–16:00','16:00–18:00'],
     1: ['11:00–13:00','13:00–16:00','16:00–18:00'],
     2: ['11:00–13:00','13:00–16:00','16:00–18:00'],
     3: ['11:00–13:00','13:00–16:00','16:00–18:00'],
     4: ['11:00–13:00','13:00–16:00','16:00–18:00'],
     5: ['11:00–13:00','13:00–16:00','16:00–18:00'],
-    6: ['11:00–13:00','13:00–16:00'],
+    6: ['11:00–13:00','13:00–16:00','16:00–18:00'],
   },
 
   /* Block entire dates: 'YYYY-MM-DD' */
@@ -516,22 +538,20 @@ let calYear, calMonth;
 /* EmailJS */
 emailjs.init(CFG.emailjsPublicKey);
 
-/* Stripe */
-let stripe, cardElement;
-function initStripe(){
-  if(stripe) return;
-  try{
-    stripe=Stripe(CFG.stripeKey);
-    const elems=stripe.elements({fonts:[{cssSrc:'https://fonts.googleapis.com/css2?family=Jost:wght@300&display=swap'}]});
-    cardElement=elems.create('card',{
-      style:{base:{fontFamily:"'Jost',sans-serif",fontWeight:'300',fontSize:'15px',color:'#2e2e2a','::placeholder':{color:'#8a8a7e'},iconColor:'#5a5a52'},invalid:{color:'#b94444',iconColor:'#b94444'}},
-      hidePostalCode:true
-    });
-    cardElement.mount('#stripe-element');
-    cardElement.on('change',e=>{ document.getElementById('stripe-error').textContent=e.error?e.error.message:''; });
-    cardElement.on('focus',()=>document.getElementById('stripe-element').classList.add('StripeElement--focus'));
-    cardElement.on('blur', ()=>document.getElementById('stripe-element').classList.remove('StripeElement--focus'));
-  }catch(e){ console.warn('Stripe init failed — check CFG.stripeKey'); }
+/* Stripe Payment Link — opens in new tab with booking details as prefill */
+function goToStripe(){
+  var data = formData();
+  var ref  = makeRef();
+  /* Store ref so success page can show it if customer returns */
+  try{ sessionStorage.setItem('pendingRef', ref); }catch(e){}
+  /* Send booking email first, then redirect */
+  sendEmail(ref, data, 'Card — redirected to Stripe Payment Link');
+  /* Build Stripe link with prefilled email if supported */
+  var link = CFG.stripePaymentLink;
+  if(data.email) link += (link.indexOf('?')>-1?'&':'?')+'prefilled_email='+encodeURIComponent(data.email);
+  window.open(link, '_blank');
+  /* Show a holding message while they pay */
+  showSuccess(ref, data, 'Complete your card payment in the Stripe window that just opened. Once paid, Song will confirm your slot via WhatsApp within 12 hours.');
 }
 
 /* ── PROMPTPAY QR — uses Google Charts API, no library needed ── */
@@ -683,7 +703,7 @@ function showStep(n){
   updateProgress(n);
   window.scrollTo({top:0,behavior:'smooth'});
   if(n===2) calInit();
-  if(n===3){ fillSummary(); initStripe(); if(selPay==='promptpay') buildPromptPayQR(); }
+  if(n===3){ fillSummary(); if(selPay==='promptpay') buildPromptPayQR(); }
 }
 function next(from){
   if(from===0){ if(!document.getElementById('fname').value.trim()||!document.getElementById('email').value.trim()){alert('Please enter your name and email.');return;} }
@@ -702,7 +722,6 @@ function switchPay(method,el){
   document.querySelectorAll('.pay-panel').forEach(p=>p.classList.remove('active'));
   document.getElementById('panel-'+method).classList.add('active');
   if(method==='promptpay') buildPromptPayQR();
-  if(method==='card') initStripe();
 }
 
 function fillSummary(){
@@ -780,15 +799,93 @@ async function payCard(){
   finally{btn.disabled=false;spin.style.display='none';}
 }
 
+/* ── PAYSLIP UPLOAD ── */
+let payslipBase64 = '';
+let payslipFile   = null;
+
+function handlePayslip(input){
+  const f = input.files[0];
+  if(!f) return;
+  if(f.size > 5*1024*1024){ alert('File is over 5 MB. Please use a smaller screenshot.'); return; }
+  payslipFile = f;
+  const reader = new FileReader();
+  reader.onload = function(e){
+    payslipBase64 = e.target.result.split(',')[1]; // base64 only
+    document.getElementById('payslip-preview').src = e.target.result;
+    document.getElementById('payslip-preview-wrap').style.display = 'block';
+    document.getElementById('payslip-area').classList.add('has-files');
+    document.getElementById('payslip-icon').textContent = '✅';
+    document.getElementById('payslip-label-text').innerHTML = '<span style="color:var(--ink)">Screenshot uploaded</span>';
+  };
+  reader.readAsDataURL(f);
+}
+
+function removePayslip(){
+  payslipBase64 = '';
+  payslipFile   = null;
+  document.getElementById('payslip-preview-wrap').style.display = 'none';
+  document.getElementById('payslip-area').classList.remove('has-files');
+  document.getElementById('payslip-icon').textContent = '📱';
+  document.getElementById('payslip-label-text').innerHTML = 'Screenshot of your transfer confirmation<br><span>Tap to upload</span>';
+  document.getElementById('payslip-input').value = '';
+}
+
+async function uploadToImgBB(base64){
+  /* ImgBB free API — get your free key at api.imgbb.com */
+  const IMGBB_KEY = CFG.imgbbKey;
+  if(!IMGBB_KEY || IMGBB_KEY.startsWith('REPLACE')){ return null; }
+  const form = new FormData();
+  form.append('key', IMGBB_KEY);
+  form.append('image', base64);
+  const res  = await fetch('https://api.imgbb.com/1/upload', { method:'POST', body:form });
+  const json = await res.json();
+  return json.success ? json.data.url : null;
+}
+
 async function submitPromptPay(){
-  const data=formData(); const btn=document.getElementById('pp-btn'); const spin=document.getElementById('pp-spinner');
-  btn.disabled=true; spin.style.display='inline-block';
+  const data = formData();
+  const btn  = document.getElementById('pp-btn');
+  const spin = document.getElementById('pp-spinner');
+
+  if(!payslipBase64){
+    alert('Please upload a screenshot of your payment before confirming.');
+    return;
+  }
+
+  btn.disabled = true; spin.style.display = 'inline-block';
+
   try{
-    const ref=makeRef();
-    await sendEmail(ref,data,'PromptPay QR — awaiting screenshot');
-    showSuccess(ref,data,'Transfer '+data.deposit.toLocaleString()+' ฿ via the QR code, then send Song a screenshot on WhatsApp to confirm your slot.');
-  }catch(e){const ref=makeRef();showSuccess(ref,data);}
-  finally{btn.disabled=false;spin.style.display='none';}
+    const ref = makeRef();
+
+    /* Try to upload payslip to ImgBB for a direct link in the email */
+    let payslipUrl = null;
+    try{ payslipUrl = await uploadToImgBB(payslipBase64); }
+    catch(e){ console.warn('ImgBB upload failed, continuing without image link'); }
+
+    const payStatus = 'PromptPay QR — screenshot '+(payslipUrl ? 'attached: '+payslipUrl : 'uploaded by customer (ImgBB key not set)');
+    await sendEmail(ref, data, payStatus);
+
+    showSuccess(ref, data,
+      'Booking submitted! Song will verify your payment and confirm your slot via WhatsApp within 12 hours.'
+    );
+
+    /* Screenshot reminder box */
+    const box = document.createElement('div');
+    box.style.cssText = 'background:rgba(46,46,42,0.06);border-left:3px solid #2e2e2a;padding:14px 16px;margin:16px auto 20px;max-width:340px;font-size:0.78rem;line-height:1.8;color:#5a5a52;text-align:left;';
+    box.innerHTML = '<strong style="color:#2e2e2a;font-weight:400;display:block;margin-bottom:4px;">✅ Payment screenshot received</strong>'
+      +'Your screenshot has been sent to Song.<br>'
+      +'Reference: <strong style="color:#2e2e2a;">'+ref+'</strong><br>'
+      +'Song will confirm your slot within 12 hours.';
+    const refBadge = document.getElementById('ref-display');
+    refBadge.parentNode.insertBefore(box, refBadge.nextSibling);
+
+  }catch(e){
+    console.error(e);
+    const ref = makeRef();
+    showSuccess(ref, data);
+  }finally{
+    btn.disabled = false; spin.style.display = 'none';
+  }
 }
 </script>
 </body>
