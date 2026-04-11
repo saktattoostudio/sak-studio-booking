@@ -199,13 +199,7 @@ textarea{resize:none;line-height:1.7;min-height:88px}
 
 <nav>
   <a href="https://sakstudio.art" class="nav-logo">
-    <svg class="logo-svg" viewBox="0 0 60 54" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <polygon points="30,2 58,50 2,50" fill="none" stroke="#2e2e2a" stroke-width="1.5"/>
-      <polygon points="30,14 50,44 10,44" fill="none" stroke="#2e2e2a" stroke-width="1.2"/>
-      <line x1="30" y1="44" x2="30" y2="54" stroke="#2e2e2a" stroke-width="1.2"/>
-      <line x1="22" y1="48" x2="38" y2="48" stroke="#2e2e2a" stroke-width="1.2"/>
-    </svg>
-    <span class="nav-brand">Sak<br>Studio</span>
+    <img src="logo.png" alt="SAK Tattoo Studio" style="height:44px;width:auto;"/>
   </a>
   <ul class="nav-links">
     <li><a href="https://sakstudio.art">Home Page</a></li>
@@ -220,7 +214,7 @@ textarea{resize:none;line-height:1.7;min-height:88px}
   <p class="hero-eyebrow">SAK Tattoo Studio — Bangkok</p>
   <h1>Book Your<br><em style="font-style:italic;font-weight:300;">Appointment</em></h1>
   <div class="hero-divider"></div>
-  <p class="hero-sub">A 1,500 ฿ deposit reserves your slot and goes toward your final tattoo price. Song will confirm via WhatsApp within 12 hours.</p>
+  <p class="hero-sub">A 1,500 ฿ deposit reserves your slot and goes toward your final tattoo price. We will confirm your booking within 12 hours.</p>
 </div>
 
 <div class="form-outer">
@@ -398,74 +392,22 @@ textarea{resize:none;line-height:1.7;min-height:88px}
         <div class="sum-total"><span>Deposit due</span><strong id="s-deposit">1,500 ฿</strong></div>
       </div>
 
-      <div class="field">
-        <label>Payment method</label>
-        <div class="pay-methods">
-          <button class="pay-tab active" onclick="switchPay('card',this)">
-            <span class="pay-tab-icon">💳</span>
-            <div><span class="pay-tab-label">Card</span><span class="pay-tab-note">Visa · Mastercard · Amex</span></div>
-          </button>
-          <button class="pay-tab" onclick="switchPay('promptpay',this)">
-            <span class="pay-tab-icon">🇹🇭</span>
-            <div><span class="pay-tab-label">PromptPay</span><span class="pay-tab-note">Scan &amp; transfer (THB)</span></div>
-          </button>
-        </div>
-      </div>
-
-      <div class="pay-panel active" id="panel-card">
-        <div style="background:rgba(46,46,42,0.04);padding:20px;margin-bottom:20px;">
+      <div style="background:rgba(46,46,42,0.04);padding:20px;margin-bottom:20px;">
           <p style="font-size:0.78rem;color:var(--ink-mid);line-height:1.8;margin-bottom:16px;">
-            You will be taken to <strong style="color:var(--ink);font-weight:400;">Stripe's secure checkout</strong> to pay your deposit. After payment, you'll be redirected back automatically.
+            You will be taken to <strong style="color:var(--ink);font-weight:400;">Stripe's secure checkout</strong> to pay your deposit. After payment, Song will confirm your slot via WhatsApp within 12 hours.
           </p>
           <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
-            <span style="font-size:0.65rem;letter-spacing:0.1em;color:var(--ink-soft);text-transform:uppercase;">Accepted cards</span>
-            <span style="font-size:0.8rem;color:var(--ink-mid);">Visa · Mastercard · Amex · UnionPay</span>
+            <span style="font-size:0.65rem;letter-spacing:0.1em;color:var(--ink-soft);text-transform:uppercase;">Accepted</span>
+            <span style="font-size:0.8rem;color:var(--ink-mid);">Visa · Mastercard · Amex · Debit cards</span>
           </div>
         </div>
         <p style="font-size:0.68rem;color:var(--ink-soft);line-height:1.6;margin-bottom:20px;letter-spacing:.03em;">
           🔒 Payments processed securely by <strong style="font-weight:400;color:var(--ink-mid);">Stripe</strong>. SAK Tattoo Studio never stores your card details.
         </p>
         <div class="btn-row">
-          <button class="btn-next" id="pay-btn" onclick="goToStripe()">Pay with card →</button>
+          <button class="btn-next" id="pay-btn" onclick="goToStripe()">Pay deposit →</button>
           <button class="btn-back" onclick="back(3)">← Back</button>
         </div>
-      </div>
-
-      <div class="pay-panel" id="panel-promptpay">
-        <div class="qr-section">
-          <div class="qr-amount-display" id="qr-amount-display">1,500 ฿</div>
-          <p class="qr-subtitle">Scan with any Thai banking app</p>
-          <div id="qr-canvas-wrap"><img src="qr_promptpay.JPG" width="220" height="320" alt="PromptPay QR"/></div>
-          <div class="qr-id-line" id="qr-id-line">PromptPay ID: —</div>
-        </div>
-        <div class="qr-steps">
-          <strong>How to pay</strong>
-          1. Open your Thai banking app (KBank, SCB, Bangkok Bank…)<br>
-          2. Choose <em>Scan QR</em> or <em>PromptPay</em><br>
-          3. Scan the QR code above<br>
-          4. Confirm the amount matches <span id="qr-step-amt">1,500 ฿</span><br>
-          5. Complete transfer → take a screenshot → upload below
-        </div>
-
-        <div class="field" style="margin-bottom:20px;">
-          <label>Upload payment screenshot *</label>
-          <div class="photo-upload-area" id="payslip-area" style="padding:18px;">
-            <input type="file" id="payslip-input" accept="image/*" onchange="handlePayslip(this)" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;"/>
-            <span class="upload-icon" id="payslip-icon">📱</span>
-            <div class="upload-label-text" id="payslip-label-text">Screenshot of your transfer confirmation<br><span>Tap to upload</span></div>
-            <div class="upload-hint">JPG or PNG — max 5 MB</div>
-          </div>
-          <div id="payslip-preview-wrap" style="margin-top:10px;position:relative;display:none;">
-            <img id="payslip-preview" style="width:100%;max-height:220px;object-fit:contain;border:1px solid var(--line);display:block;"/>
-            <button onclick="removePayslip()" style="position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:50%;background:var(--ink);color:var(--card);border:none;cursor:pointer;font-size:0.65rem;">✕</button>
-          </div>
-        </div>
-
-        <div class="btn-row">
-          <button class="btn-next" id="pp-btn" onclick="submitPromptPay()">Confirm booking <span class="btn-spinner" id="pp-spinner"></span></button>
-          <button class="btn-back" onclick="back(3)">← Back</button>
-        </div>
-      </div>
     </div>
 
     <!-- SUCCESS -->
@@ -494,28 +436,28 @@ const CFG = {
   /* Stripe Payment Link — create at dashboard.stripe.com → Payment Links
      Set product: SAK Tattoo Deposit, price 1500 THB
      Copy the link e.g. https://buy.stripe.com/xxxxxxxx              */
-  stripePaymentLink: 'https://buy.stripe.com/bJe7sK0AM4hU1qogy4f3a00',
-  promptPayId:       '0612298996',    // Your phone or 13-digit ID/tax ID  
-  emailjsPublicKey:  'HS5XYBT3XgT4JVW90',   // emailjs.com → Account → Public key
-  emailjsServiceId:  'service_somqexg',     // EmailJS → Email Services
-  emailjsTemplateId: 'template_klpy678',    // EmailJS → Email Templates
-  whatsappNumber:    '66612298996',          // International format, no +
-  depositMap: { XS:1500, S:1500, M:1500, L:1500, Unsure:1500 },
+  stripePaymentLink: 'https://buy.stripe.com/REPLACE_WITH_YOUR_LINK',
+  promptPayId:       '0612298996',  // Song's SCB PromptPay number
+  emailjsPublicKey:  'REPLACE_YOUR_EMAILJS_PUBLIC_KEY',
+  emailjsServiceId:  'REPLACE_YOUR_SERVICE_ID',
+  emailjsTemplateId: 'REPLACE_YOUR_TEMPLATE_ID',
+  whatsappNumber:    '66XXXXXXXXX',
+  depositMap: { XS:1500, S:1500, M:1500, L:2000, Unsure:1500 },
 
   /* ImgBB — free image hosting for payslip uploads
      Sign up free at api.imgbb.com → get your API key
      Free plan = unlimited uploads                        */
-  imgbbKey: 'af360496ebc693d6c8b3ef02b724bd3d',
+  imgbbKey: 'REPLACE_YOUR_IMGBB_API_KEY',
 
   /* Which time slots open per weekday (0=Sun … 6=Sat). null = closed */
   openHours: {
-    0: ['11:00–13:00','13:00–16:00','16:00–18:00','18:00–20:00'],
-    1: ['11:00–13:00','13:00–16:00','16:00–18:00','18:00–20:00'],
-    2: ['11:00–13:00','13:00–16:00','16:00–18:00','18:00–20:00'],
-    3: ['11:00–13:00','13:00–16:00','16:00–18:00','18:00–20:00'],
-    4: ['11:00–13:00','13:00–16:00','16:00–18:00','18:00–20:00'],
-    5: ['11:00–13:00','13:00–16:00','16:00–18:00','18:00–20:00'],
-    6: ['11:00–13:00','13:00–16:00','16:00–18:00','18:00–20:00'],
+    0: null,
+    1: ['11:00–13:00','13:00–16:00','16:00–18:00'],
+    2: ['11:00–13:00','13:00–16:00','16:00–18:00'],
+    3: ['11:00–13:00','13:00–16:00','16:00–18:00'],
+    4: ['11:00–13:00','13:00–16:00','16:00–18:00'],
+    5: ['11:00–13:00','13:00–16:00','16:00–18:00'],
+    6: ['11:00–13:00','13:00–16:00'],
   },
 
   /* Block entire dates: 'YYYY-MM-DD' */
