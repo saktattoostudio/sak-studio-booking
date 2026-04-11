@@ -750,23 +750,6 @@ function showSuccess(ref,data,msgOverride){
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
-async function payCard(){
-  const data=formData(); const btn=document.getElementById('pay-btn'); const spin=document.getElementById('pay-spinner');
-  if(!stripe||!cardElement){alert('Stripe not loaded. Check CFG.stripeKey.');return;}
-  btn.disabled=true; spin.style.display='inline-block'; document.getElementById('stripe-error').textContent='';
-  try{
-    const{paymentMethod,error}=await stripe.createPaymentMethod({
-      type:'card',card:cardElement,
-      billing_details:{name:document.getElementById('card-name').value||data.fname+' '+data.lname,email:data.email}
-    });
-    if(error){document.getElementById('stripe-error').textContent=error.message;return;}
-    const ref=makeRef();
-    await sendEmail(ref,data,'Card (Stripe PM: '+paymentMethod.id+')');
-    showSuccess(ref,data,'Card secured with Stripe. We will confirm your slot via email within 12 hours.');
-  }catch(e){document.getElementById('stripe-error').textContent='Payment error — please try again.';console.error(e);}
-  finally{btn.disabled=false;spin.style.display='none';}
-}
-
 /* ── PAYSLIP UPLOAD ── */
 let payslipBase64 = '';
 let payslipFile   = null;
