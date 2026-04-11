@@ -536,19 +536,20 @@ let calYear, calMonth;
 /* EmailJS */
 emailjs.init(CFG.emailjsPublicKey);
 
-/* Stripe Payment Link — opens in new tab with booking details as prefill */
-function goToStripe(){
+async function goToStripe(){
   var data = formData();
   var ref  = makeRef();
-  /* Store ref so success page can show it if customer returns */
   try{ sessionStorage.setItem('pendingRef', ref); }catch(e){}
-  /* Send booking email first, then redirect */
-  sendEmail(ref, data, 'Card — redirected to Stripe Payment Link');
-  /* Build Stripe link with prefilled email if supported */
+
+  /* Upload reference photos first then send email */
+  const photosUrl = await uploadReferencePhotos();
+  await sendEmail(ref, data, 'Card — Stripe Payment Link', null, photosUrl);
+
+  /* Redirect to Stripe */
   var link = CFG.stripePaymentLink;
   if(data.email) link += (link.indexOf('?')>-1?'&':'?')+'prefilled_email='+encodeURIComponent(data.email);
   window.open(link, '_blank');
-  /* Show a holding message while they pay */
+
   showSuccess(ref, data, 'Complete your card payment in the Stripe window that just opened. Once paid, we will confirm your slot via email within 12 hours.');
 }
 
@@ -660,7 +661,30 @@ function removePhoto(idx){
   if(uploadedFiles.length<5) document.getElementById('upload-area').classList.remove('has-files');
 }
 
-/* ── PROGRESS & NAVIGATION ── */
+/* ── UPLOAD REFERENCE PHOTOS TO IMGBB ── */
+async function uploadReferencePhotos(){
+  if(uploadedFiles.length === 0) return 'None';
+  const urls = [];
+  for(let i = 0; i < uploadedFiles.length; i++){
+    try{
+      const base64 = await fileToBase64(uploadedFiles[i]);
+      const url = await uploadToImgBB(base64);
+      if(url) urls.push(url);
+    }catch(e){ console.warn('Photo '+(i+1)+' upload failed:', e); }
+  }
+  return urls.length > 0 ? urls.join(' | ') : uploadedFiles.length+' photo(s) — upload failed';
+}
+
+function fileToBase64(file){
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = e => resolve(e.target.result.split(',')[1]);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+
 function updateProgress(active){
   for(let i=0;i<4;i++){
     const num=document.getElementById('pn'+i), lbl=document.getElementById('pl'+i);
@@ -728,7 +752,7 @@ function formData(){
 
 function makeRef(){ return 'SAK-'+Math.random().toString(36).substr(2,6).toUpperCase(); }
 
-function sendEmail(ref, data, payStatus, payslipDataUrl){
+function sendEmail(ref, data, payStatus, payslipUrl, photosUrl){
   return emailjs.send(CFG.emailjsServiceId, CFG.emailjsTemplateId,{
     ref,
     customer_name:  data.fname+' '+data.lname,
@@ -742,11 +766,9 @@ function sendEmail(ref, data, payStatus, payslipDataUrl){
     date:           data.date,
     time:           data.time,
     deposit:        data.deposit.toLocaleString()+' THB',
-    photos:         data.photoCount>0 ? data.photoCount+' reference photo(s) uploaded' : 'None',
+    photos:         photosUrl || (data.photoCount>0 ? data.photoCount+' photo(s) — uploading failed' : 'None'),
     pay_method:     payStatus,
-    payslip:        payslipDataUrl
-      ? '<img src="'+payslipDataUrl+'" style="max-width:400px;border:1px solid #ddd;margin-top:8px;" alt="Payment screenshot"/>'
-      : 'Not provided',
+    payslip:        payslipUrl ? payslipUrl : 'Not provided',
   }).catch(e=>console.warn('EmailJS:',e));
 }
 
@@ -816,9 +838,19 @@ async function submitPromptPay(){
 
   try{
     const ref = makeRef();
-    /* Send payslip as base64 data URL directly in email — no external service needed */
-    const payslipDataUrl = 'data:image/jpeg;base64,' + payslipBase64;
-    await sendEmail(ref, data, 'PromptPay — screenshot attached in email', payslipDataUrl);
+
+    /* Upload reference photos and payslip to ImgBB */
+    const [photosUrl, payslipUrl] = await Promise.all([
+      uploadReferencePhotos(),
+      uploadToImgBB(payslipBase64).catch(()=>null)
+    ]);
+
+    const payStatus = 'PromptPay QR'
+      + (payslipUrl
+          ? ' — payslip: ' + payslipUrl
+          : ' — payslip upload failed, ref: ');
+
+    await sendEmail(ref, data, payStatus, payslipUrl, photosUrl);
 
     showSuccess(ref, data,
       'Payment screenshot received. We will verify your transfer and confirm your slot via email within 12 hours.'
