@@ -754,6 +754,7 @@ function makeRef(){ return 'SAK-'+Math.random().toString(36).substr(2,6).toUpper
 
 function sendEmail(ref, data, payStatus, payslipUrl, photosUrl){
   return emailjs.send(CFG.emailjsServiceId, CFG.emailjsTemplateId,{
+    to_email:       'saktattoostudio@gmail.com',
     ref,
     customer_name:  data.fname+' '+data.lname,
     customer_email: data.email,
@@ -766,10 +767,10 @@ function sendEmail(ref, data, payStatus, payslipUrl, photosUrl){
     date:           data.date,
     time:           data.time,
     deposit:        data.deposit.toLocaleString()+' THB',
-    photos:         photosUrl || (data.photoCount>0 ? data.photoCount+' photo(s) — uploading failed' : 'None'),
+    photos:         photosUrl || (data.photoCount>0 ? data.photoCount+' photo(s) — upload failed' : 'None'),
     pay_method:     payStatus,
-    payslip:        payslipUrl ? payslipUrl : 'Not provided',
-  }).catch(e=>console.warn('EmailJS:',e));
+    payslip:        payslipUrl || 'Not provided',
+  }).catch(e=>console.warn('EmailJS error:',e));
 }
 
 function showSuccess(ref,data,msgOverride){
@@ -813,15 +814,20 @@ function removePayslip(){
 }
 
 async function uploadToImgBB(base64){
-  /* ImgBB free API — get your free key at api.imgbb.com */
   const IMGBB_KEY = CFG.imgbbKey;
-  if(!IMGBB_KEY || IMGBB_KEY.startsWith('REPLACE')){ return null; }
-  const form = new FormData();
-  form.append('key', IMGBB_KEY);
-  form.append('image', base64);
-  const res  = await fetch('https://api.imgbb.com/1/upload', { method:'POST', body:form });
-  const json = await res.json();
-  return json.success ? json.data.url : null;
+  if(!IMGBB_KEY || IMGBB_KEY.startsWith('REPLACE')){ console.warn('ImgBB key not set'); return null; }
+  try{
+    const form = new FormData();
+    form.append('key', IMGBB_KEY);
+    form.append('image', base64);
+    const res  = await fetch('https://api.imgbb.com/1/upload', { method:'POST', body:form });
+    const json = await res.json();
+    console.log('ImgBB response:', json);
+    return json.success ? json.data.url : null;
+  }catch(e){
+    console.error('ImgBB fetch error:', e);
+    return null;
+  }
 }
 
 async function submitPromptPay(){
