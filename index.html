@@ -214,7 +214,7 @@ textarea{resize:none;line-height:1.7;min-height:88px}
   <p class="hero-eyebrow">SAK Tattoo Studio — Bangkok</p>
   <h1>Book Your<br><em style="font-style:italic;font-weight:300;">Appointment</em></h1>
   <div class="hero-divider"></div>
-  <p class="hero-sub">A 1,500 ฿ deposit reserves your slot and goes toward your final tattoo price. Song will confirm via WhatsApp within 12 hours.</p>
+  <p class="hero-sub">A 1,500 ฿ deposit reserves your slot and goes toward your final tattoo price. We will confirm via email within 12 hours.</p>
 </div>
 
 <div class="form-outer">
@@ -246,7 +246,7 @@ textarea{resize:none;line-height:1.7;min-height:88px}
     <!-- STEP 1 -->
     <div class="step active" id="step-0">
       <h2 class="step-heading">Your Details</h2>
-      <p class="step-sub">So Song knows who to expect</p>
+      <p class="step-sub">So we know who to expect</p>
       <div class="field-row">
         <div class="field"><label>First Name *</label><input type="text" id="fname" placeholder="Alex"/></div>
         <div class="field"><label>Last Name *</label><input type="text" id="lname" placeholder="Smith"/></div>
@@ -270,7 +270,7 @@ textarea{resize:none;line-height:1.7;min-height:88px}
     <!-- STEP 2 -->
     <div class="step" id="step-1">
       <h2 class="step-heading">Your Tattoo</h2>
-      <p class="step-sub">Tell Song what you have in mind</p>
+      <p class="step-sub">Tell us what you have in mind</p>
 
       <div class="field">
         <label>Style</label>
@@ -323,7 +323,7 @@ textarea{resize:none;line-height:1.7;min-height:88px}
 
       <div class="field">
         <label>Your idea or reference</label>
-        <textarea id="idea" placeholder="Describe what you'd like — Song will respond with thoughts before your appointment."></textarea>
+        <textarea id="idea" placeholder="Describe what you'd like — we will respond with thoughts before your appointment."></textarea>
       </div>
 
       <div class="field">
@@ -371,7 +371,7 @@ textarea{resize:none;line-height:1.7;min-height:88px}
 
       <div class="policy-note">
         <strong>Deposit policy</strong><br>
-        Your deposit is deducted from the final price. Cancellations with 48+ hours notice receive a full credit toward a future booking. Under 48 hours, the deposit is retained. No-shows forfeit the deposit. Song will confirm your slot via WhatsApp within 12 hours.
+        Your deposit is deducted from the final price. Cancellations with 48+ hours notice receive a full credit toward a future booking. Under 48 hours, the deposit is retained. No-shows forfeit the deposit. We will confirm your slot via email within 12 hours.
       </div>
       <div class="btn-row">
         <button class="btn-next" onclick="next(2)">Continue</button>
@@ -410,7 +410,7 @@ textarea{resize:none;line-height:1.7;min-height:88px}
       <div class="pay-panel active" id="panel-card">
         <div style="background:rgba(46,46,42,0.04);padding:20px;margin-bottom:20px;">
           <p style="font-size:0.78rem;color:var(--ink-mid);line-height:1.8;margin-bottom:16px;">
-            You will be taken to <strong style="color:var(--ink);font-weight:400;">Stripe's secure checkout</strong> to pay your deposit. After payment, Song will confirm your slot via WhatsApp within 12 hours.
+            You will be taken to <strong style="color:var(--ink);font-weight:400;">Stripe's secure checkout</strong> to pay your deposit. After payment, we will confirm your slot via email within 12 hours.
           </p>
           <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
             <span style="font-size:0.65rem;letter-spacing:0.1em;color:var(--ink-soft);text-transform:uppercase;">Accepted</span>
@@ -464,10 +464,20 @@ textarea{resize:none;line-height:1.7;min-height:88px}
     <!-- SUCCESS -->
     <div class="success" id="success">
       <div class="success-mark">✓</div>
-      <h2>Booking Requested</h2>
-      <p id="success-msg">Song will confirm your slot and payment details via WhatsApp within 12 hours.</p>
+      <h2 id="success-title">Booking Requested</h2>
+      <p id="success-msg">We will confirm your slot and payment details via email within 12 hours.</p>
+
+      <!-- Payment confirmed box — shown for PromptPay -->
+      <div id="payment-confirmed-box" style="display:none;background:rgba(46,46,42,0.06);border:1px solid rgba(46,46,42,0.2);padding:20px 24px;margin:0 auto 24px;max-width:360px;text-align:left;">
+        <p style="font-size:0.72rem;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:10px;">Payment received</p>
+        <p style="font-family:'Cormorant',serif;font-size:1.5rem;font-weight:300;color:var(--ink);margin-bottom:4px;">✅ Screenshot submitted</p>
+        <p style="font-size:0.76rem;color:var(--ink-mid);line-height:1.8;">
+          We will verify your transfer and confirm your slot via <strong style="font-weight:400;color:var(--ink);">email</strong> within 12 hours.
+        </p>
+      </div>
+
       <div class="ref-badge" id="ref-display">SAK-000000</div><br>
-      <a href="#" class="btn-whatsapp" id="wa-link" target="_blank">Message Song on WhatsApp</a>
+      <a href="#" class="btn-whatsapp" id="wa-link" target="_blank">Contact us on WhatsApp</a>
       <p style="margin-top:24px;font-size:.7rem;color:var(--ink-soft);">247 S Sathon Rd, Yan Nawa, Bangkok · 3 min from BTS Saphan Taksin</p>
     </div>
 
@@ -533,7 +543,7 @@ function goToStripe(){
   if(data.email) link += (link.indexOf('?')>-1?'&':'?')+'prefilled_email='+encodeURIComponent(data.email);
   window.open(link, '_blank');
   /* Show a holding message while they pay */
-  showSuccess(ref, data, 'Complete your card payment in the Stripe window that just opened. Once paid, Song will confirm your slot via WhatsApp within 12 hours.');
+  showSuccess(ref, data, 'Complete your card payment in the Stripe window that just opened. Once paid, we will confirm your slot via email within 12 hours.');
 }
 
 /* ── PROMPTPAY QR — uses Google Charts API, no library needed ── */
@@ -756,7 +766,7 @@ function sendEmail(ref,data,payStatus){
 function showSuccess(ref,data,msgOverride){
   document.getElementById('ref-display').textContent=ref;
   if(msgOverride) document.getElementById('success-msg').textContent=msgOverride;
-  const waMsg=encodeURIComponent('Hi Song! Booking '+ref+' submitted.\n\nName: '+data.fname+' '+data.lname+'\nSize: '+data.size+'\nStyle: '+data.style+'\nDate: '+data.date+'  Time: '+data.time+'\nPayment: '+data.payMethod+'\nIdea: '+(data.idea||'—')+'\n\nLooking forward to it!');
+  const waMsg=encodeURIComponent('Hi! Booking '+ref+' submitted.\n\nName: '+data.fname+' '+data.lname+'\nSize: '+data.size+'\nStyle: '+data.style+'\nDate: '+data.date+'  Time: '+data.time+'\nPayment: '+data.payMethod+'\nIdea: '+(data.idea||'—')+'\n\nLooking forward to it!');
   document.getElementById('wa-link').href='https://wa.me/'+CFG.whatsappNumber+'?text='+waMsg;
   document.querySelectorAll('.step').forEach(s=>s.classList.remove('active'));
   document.getElementById('progress').style.opacity='0';
@@ -776,7 +786,7 @@ async function payCard(){
     if(error){document.getElementById('stripe-error').textContent=error.message;return;}
     const ref=makeRef();
     await sendEmail(ref,data,'Card (Stripe PM: '+paymentMethod.id+')');
-    showSuccess(ref,data,'Card secured with Stripe. Song will confirm your slot and charge the deposit within 12 hours.');
+    showSuccess(ref,data,'Card secured with Stripe. We will confirm your slot via email within 12 hours.');
   }catch(e){document.getElementById('stripe-error').textContent='Payment error — please try again.';console.error(e);}
   finally{btn.disabled=false;spin.style.display='none';}
 }
@@ -848,18 +858,12 @@ async function submitPromptPay(){
     await sendEmail(ref, data, payStatus);
 
     showSuccess(ref, data,
-      'Booking submitted! Song will verify your payment and confirm your slot via WhatsApp within 12 hours.'
+      'Payment screenshot received. We will verify your transfer and confirm your slot via email within 12 hours.'
     );
 
-    /* Screenshot reminder box */
-    const box = document.createElement('div');
-    box.style.cssText = 'background:rgba(46,46,42,0.06);border-left:3px solid #2e2e2a;padding:14px 16px;margin:16px auto 20px;max-width:340px;font-size:0.78rem;line-height:1.8;color:#5a5a52;text-align:left;';
-    box.innerHTML = '<strong style="color:#2e2e2a;font-weight:400;display:block;margin-bottom:4px;">✅ Payment screenshot received</strong>'
-      +'Your screenshot has been sent to Song.<br>'
-      +'Reference: <strong style="color:#2e2e2a;">'+ref+'</strong><br>'
-      +'Song will confirm your slot within 12 hours.';
-    const refBadge = document.getElementById('ref-display');
-    refBadge.parentNode.insertBefore(box, refBadge.nextSibling);
+    /* Show payment confirmed box */
+    document.getElementById('success-title').textContent = 'Payment Submitted!';
+    document.getElementById('payment-confirmed-box').style.display = 'block';
 
   }catch(e){
     console.error(e);
