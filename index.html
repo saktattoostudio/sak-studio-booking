@@ -476,7 +476,14 @@ textarea{resize:none;line-height:1.7;min-height:88px}
       </div>
 
       <div class="ref-badge" id="ref-display">SAK-000000</div><br>
-      <a href="#" class="btn-whatsapp" id="wa-link" target="_blank">Contact us on WhatsApp</a>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:10px;margin-bottom:8px;">
+        <a href="mailto:saktattoostudio@gmail.com" class="btn-whatsapp" style="width:240px;justify-content:center;">
+          ✉ Email us
+        </a>
+        <a href="https://instagram.com/sakstudio.bkk" class="btn-whatsapp" style="width:240px;justify-content:center;background:var(--ink-mid);" target="_blank">
+          📷 DM on Instagram
+        </a>
+      </div>
       <p style="margin-top:24px;font-size:.7rem;color:var(--ink-soft);">247 S Sathon Rd, Yan Nawa, Bangkok · 3 min from BTS Saphan Taksin</p>
     </div>
 
@@ -721,28 +728,31 @@ function formData(){
 
 function makeRef(){ return 'SAK-'+Math.random().toString(36).substr(2,6).toUpperCase(); }
 
-function sendEmail(ref,data,payStatus){
-  return emailjs.send(CFG.emailjsServiceId,CFG.emailjsTemplateId,{
+function sendEmail(ref, data, payStatus, payslipDataUrl){
+  return emailjs.send(CFG.emailjsServiceId, CFG.emailjsTemplateId,{
     ref,
-    customer_name:data.fname+' '+data.lname,
-    customer_email:data.email,
-    customer_phone:data.phone||'—',
-    country:data.country||'—',
-    style:data.style, size:data.size,
-    placement:data.placement||'—',
-    idea:data.idea||'—',
-    date:data.date, time:data.time,
-    deposit:data.deposit.toLocaleString()+' THB',
-    photos:data.photoCount>0?data.photoCount+' photo(s) attached by customer':'None',
-    pay_method:payStatus,
+    customer_name:  data.fname+' '+data.lname,
+    customer_email: data.email,
+    customer_phone: data.phone||'—',
+    country:        data.country||'—',
+    style:          data.style,
+    size:           data.size,
+    placement:      data.placement||'—',
+    idea:           data.idea||'—',
+    date:           data.date,
+    time:           data.time,
+    deposit:        data.deposit.toLocaleString()+' THB',
+    photos:         data.photoCount>0 ? data.photoCount+' reference photo(s) uploaded' : 'None',
+    pay_method:     payStatus,
+    payslip:        payslipDataUrl
+      ? '<img src="'+payslipDataUrl+'" style="max-width:400px;border:1px solid #ddd;margin-top:8px;" alt="Payment screenshot"/>'
+      : 'Not provided',
   }).catch(e=>console.warn('EmailJS:',e));
 }
 
 function showSuccess(ref,data,msgOverride){
   document.getElementById('ref-display').textContent=ref;
   if(msgOverride) document.getElementById('success-msg').textContent=msgOverride;
-  const waMsg=encodeURIComponent('Hi! Booking '+ref+' submitted.\n\nName: '+data.fname+' '+data.lname+'\nSize: '+data.size+'\nStyle: '+data.style+'\nDate: '+data.date+'  Time: '+data.time+'\nPayment: '+data.payMethod+'\nIdea: '+(data.idea||'—')+'\n\nLooking forward to it!');
-  document.getElementById('wa-link').href='https://wa.me/'+CFG.whatsappNumber+'?text='+waMsg;
   document.querySelectorAll('.step').forEach(s=>s.classList.remove('active'));
   document.getElementById('progress').style.opacity='0';
   document.getElementById('success').classList.add('show');
@@ -806,20 +816,14 @@ async function submitPromptPay(){
 
   try{
     const ref = makeRef();
-
-    /* Try to upload payslip to ImgBB for a direct link in the email */
-    let payslipUrl = null;
-    try{ payslipUrl = await uploadToImgBB(payslipBase64); }
-    catch(e){ console.warn('ImgBB upload failed, continuing without image link'); }
-
-    const payStatus = 'PromptPay QR — screenshot '+(payslipUrl ? 'attached: '+payslipUrl : 'uploaded by customer (ImgBB key not set)');
-    await sendEmail(ref, data, payStatus);
+    /* Send payslip as base64 data URL directly in email — no external service needed */
+    const payslipDataUrl = 'data:image/jpeg;base64,' + payslipBase64;
+    await sendEmail(ref, data, 'PromptPay — screenshot attached in email', payslipDataUrl);
 
     showSuccess(ref, data,
       'Payment screenshot received. We will verify your transfer and confirm your slot via email within 12 hours.'
     );
 
-    /* Show payment confirmed box */
     document.getElementById('success-title').textContent = 'Payment Submitted!';
     document.getElementById('payment-confirmed-box').style.display = 'block';
 
