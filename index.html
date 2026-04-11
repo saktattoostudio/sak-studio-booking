@@ -541,16 +541,19 @@ async function goToStripe(){
   var ref  = makeRef();
   try{ sessionStorage.setItem('pendingRef', ref); }catch(e){}
 
-  /* Upload reference photos first then send email */
+  /* Show loading state on button */
+  var btn = document.getElementById('pay-btn');
+  btn.textContent = 'Redirecting to Stripe...';
+  btn.disabled = true;
+
+  /* Upload reference photos and send email */
   const photosUrl = await uploadReferencePhotos();
   await sendEmail(ref, data, 'Card — Stripe Payment Link', null, photosUrl);
 
-  /* Redirect to Stripe */
+  /* Redirect in same tab — works on all mobile browsers */
   var link = CFG.stripePaymentLink;
   if(data.email) link += (link.indexOf('?')>-1?'&':'?')+'prefilled_email='+encodeURIComponent(data.email);
-  window.open(link, '_blank');
-
-  showSuccess(ref, data, 'Complete your card payment in the Stripe window that just opened. Once paid, we will confirm your slot via email within 12 hours.');
+  window.location.href = link;
 }
 
 /* ── PROMPTPAY QR — static image, just update amount display ── */
