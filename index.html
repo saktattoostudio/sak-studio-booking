@@ -273,7 +273,7 @@ textarea{resize:none;line-height:1.7;min-height:88px}
       <p class="step-sub">Tell us what you have in mind</p>
 
       <div class="field">
-        <label>Style *</label>
+        <label>Style</label>
         <select id="style">
           <option value="">Choose a style...</option>
           <option>Fine Line / Minimalist</option>
@@ -546,37 +546,13 @@ function goToStripe(){
   showSuccess(ref, data, 'Complete your card payment in the Stripe window that just opened. Once paid, we will confirm your slot via email within 12 hours.');
 }
 
-/* ── PROMPTPAY QR — uses Google Charts API, no library needed ── */
-function ppCRC16(str){
-  var crc=0xFFFF;
-  for(var i=0;i<str.length;i++){
-    crc^=str.charCodeAt(i)<<8;
-    for(var j=0;j<8;j++) crc=(crc&0x8000)?(crc<<1)^0x1021:(crc<<1);
-  }
-  return ((crc&0xFFFF).toString(16).toUpperCase().padStart(4,'0'));
-}
-function ppField(id,value){
-  return id+String(value.length).padStart(2,'0')+value;
-}
-function buildPromptPayPayload(phone, amount){
-  var n=phone.replace(/\D/g,'');
-  if(n.startsWith('0')) n='66'+n.slice(1);
-  var target='0066'+n.slice(2);
-  var merchant=ppField('00','A000000677010111')+ppField('01',target);
-  var payload=ppField('00','01')+ppField('01','12')+ppField('29',merchant)+ppField('53','764')+ppField('54',amount.toFixed(2))+ppField('58','TH')+'6304';
-  return payload+ppCRC16(payload);
-}
+/* ── PROMPTPAY QR — static image, just update amount display ── */
 function buildPromptPayQR(){
   try{
-    var payload=buildPromptPayPayload(CFG.promptPayId, selDeposit);
-    var encoded=encodeURIComponent(payload);
-    var url='https://chart.googleapis.com/chart?cht=qr&chs=220x220&chl='+encoded+'&choe=UTF-8';
-    var img=document.getElementById('qr-img');
-    img.src=url;
-    img.style.display='block';
-    document.getElementById('qr-id-line').textContent='PromptPay: '+CFG.promptPayId+' (SCB)';
+    /* Static QR image is already shown — just update amount display */
     document.getElementById('qr-amount-display').textContent=selDeposit.toLocaleString()+' ฿';
     document.getElementById('qr-step-amt').textContent=selDeposit.toLocaleString()+' ฿';
+    document.getElementById('qr-id-line').textContent='PromptPay: '+CFG.promptPayId+' (SCB)';
   }catch(e){ console.error('QR build error:',e); }
 }
 
