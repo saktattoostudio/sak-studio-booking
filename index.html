@@ -3,41 +3,42 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Book a Deposit — SAK Tattoo Studio</title>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@200;300;400&display=swap" rel="stylesheet">
+<title>Book a Session — Sak Studio</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,400;1,9..144,500&family=Space+Grotesk:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 
 <style>
 :root {
-  --bg:       #c5c7b5;
-  --card:     #edeade;
-  --card2:    #e6e2d4;
-  --ink:      #2e2e2a;
-  --ink-mid:  #5a5a52;
-  --ink-soft: #8a8a7e;
-  --line:     rgba(46,46,42,0.15);
-  --line-med: rgba(46,46,42,0.25);
+  --bg:       #f5f1e6;
+  --card:     #fffdf7;
+  --card2:    #efe9d9;
+  --ink:      #1e3a2b;
+  --ink-mid:  #4a5a47;
+  --ink-soft: #7d8a78;
+  --accent:   #a83a2a;
+  --line:     rgba(30,58,43,0.14);
+  --line-med: rgba(30,58,43,0.28);
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
-body{background:var(--bg);color:var(--ink);font-family:'Jost',sans-serif;font-weight:300;min-height:100vh}
+body{background:var(--bg);color:var(--ink);font-family:'Space Grotesk',sans-serif;font-weight:300;min-height:100vh}
 body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 60% 80% at 10% 90%,rgba(100,110,80,.12) 0%,transparent 70%),radial-gradient(ellipse 40% 60% at 90% 10%,rgba(120,125,95,.08) 0%,transparent 60%);pointer-events:none;z-index:0}
 
 /* NAV */
-nav{display:flex;justify-content:space-between;align-items:center;padding:22px 48px;position:relative;z-index:10}
-.nav-logo{display:flex;align-items:center;gap:12px;text-decoration:none;color:var(--ink)}
-.logo-svg{width:36px;height:32px}
-.nav-brand{font-family:'Cormorant',serif;font-weight:300;font-size:.85rem;letter-spacing:.22em;text-transform:uppercase;line-height:1.3}
-.nav-links{display:flex;gap:32px;list-style:none}
-.nav-links a{font-family:'Jost',sans-serif;font-weight:300;font-size:.82rem;letter-spacing:.04em;color:var(--ink);text-decoration:none;opacity:.75;transition:opacity .2s}
-.nav-links a:hover{opacity:1}
-.nav-links a.active{opacity:1;font-weight:400}
-@media(max-width:640px){nav{padding:18px 24px}.nav-links{display:none}}
+nav{position:sticky;top:0;z-index:100;display:flex;justify-content:space-between;align-items:center;padding:16px 48px;background:rgba(245,241,230,0.92);backdrop-filter:blur(10px);border-bottom:1px solid rgba(30,58,43,0.12);box-shadow:0 2px 16px -10px rgba(30,58,43,0.3)}
+.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--ink)}
+.nav-brand{font-family:'Fraunces',serif;font-weight:500;font-size:.82rem;letter-spacing:.18em;text-transform:uppercase;line-height:1.3;color:var(--ink)}
+.nav-links{display:flex;align-items:center;gap:26px;list-style:none}
+.nav-links a{font-family:'Space Grotesk',sans-serif;font-weight:400;font-size:.78rem;letter-spacing:.03em;color:#3f4f3b;text-decoration:none;transition:color .2s}
+.nav-links a:hover{color:var(--accent)}
+.nav-links a.active{color:#fffdf7;background:var(--accent);padding:9px 20px;border-radius:40px;font-weight:600}
+@media(max-width:720px){nav{padding:14px 24px}.nav-links{display:none}}
 
 /* HERO */
 .hero{position:relative;z-index:1;text-align:center;padding:48px 24px 40px}
 .hero-eyebrow{font-size:.7rem;font-weight:300;letter-spacing:.28em;text-transform:uppercase;color:var(--ink-mid);margin-bottom:20px}
-.hero h1{font-family:'Cormorant',serif;font-weight:300;font-size:clamp(2.8rem,8vw,5.5rem);letter-spacing:.04em;line-height:1.05;text-transform:uppercase;margin-bottom:18px}
+.hero h1{font-family:'Fraunces',serif;font-weight:300;font-size:clamp(2.4rem,6vw,4rem);letter-spacing:-0.01em;line-height:1.06;margin-bottom:18px;color:var(--ink)}
+.hero h1 em{font-style:italic;color:var(--accent)}
 .hero-sub{font-size:.82rem;font-weight:300;color:var(--ink-mid);letter-spacing:.05em;max-width:420px;margin:0 auto;line-height:1.8}
 .hero-divider{width:40px;height:1px;background:var(--ink-soft);margin:28px auto;opacity:.5}
 
@@ -54,16 +55,16 @@ nav{display:flex;justify-content:space-between;align-items:center;padding:22px 4
 .prog-label{font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);transition:color .3s;white-space:nowrap}
 .prog-label.active{color:var(--ink)}
 .prog-line{flex:1;height:1px;background:var(--line);margin:0 10px}
-.prog-line.done{background:rgba(46,46,42,.35)}
+.prog-line.done{background:rgba(30,58,43,.35)}
 @media(max-width:480px){.prog-label{display:none}.prog-line{margin:0 6px}}
 
 /* CARD */
-.card{background:var(--card);padding:40px}
+.card{background:var(--card);padding:40px;border-radius:18px;box-shadow:0 12px 32px -20px rgba(30,58,43,0.35)}
 @media(max-width:500px){.card{padding:28px 22px}}
 .step{display:none}
 .step.active{display:block;animation:stepIn .35s ease}
 @keyframes stepIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-.step-heading{font-family:'Cormorant',serif;font-weight:300;font-size:1.7rem;letter-spacing:.03em;margin-bottom:6px}
+.step-heading{font-family:'Fraunces',serif;font-weight:300;font-size:1.7rem;letter-spacing:.03em;margin-bottom:6px}
 .step-sub{font-size:.76rem;font-weight:300;color:var(--ink-soft);letter-spacing:.05em;margin-bottom:30px}
 
 /* FIELDS */
@@ -71,7 +72,7 @@ nav{display:flex;justify-content:space-between;align-items:center;padding:22px 4
 .field-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 @media(max-width:440px){.field-row{grid-template-columns:1fr}}
 label{display:block;font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-mid);margin-bottom:7px;font-weight:400}
-input[type=text],input[type=email],input[type=tel],textarea,select{width:100%;background:transparent;border:none;border-bottom:1px solid var(--line);padding:8px 0 10px;font-family:'Jost',sans-serif;font-weight:300;font-size:.9rem;color:var(--ink);outline:none;transition:border-color .2s;border-radius:0;appearance:none;-webkit-appearance:none}
+input[type=text],input[type=email],input[type=tel],textarea,select{width:100%;background:transparent;border:none;border-bottom:1px solid var(--line);padding:8px 0 10px;font-family:'Space Grotesk',sans-serif;font-weight:300;font-size:.9rem;color:var(--ink);outline:none;transition:border-color .2s;border-radius:0;appearance:none;-webkit-appearance:none}
 input:focus,textarea:focus,select:focus{border-bottom-color:var(--ink)}
 input::placeholder,textarea::placeholder{color:var(--ink-soft);font-weight:300;font-size:.85rem}
 select{cursor:pointer}
@@ -81,16 +82,16 @@ textarea{resize:none;line-height:1.7;min-height:88px}
 /* SIZE OPTIONS */
 .size-options{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px}
 .size-opt{background:transparent;border:1px solid var(--line);padding:16px 12px 14px;cursor:pointer;text-align:center;transition:all .2s}
-.size-opt:hover{border-color:rgba(46,46,42,.4)}
+.size-opt:hover{border-color:rgba(30,58,43,.4)}
 .size-opt.selected{background:var(--ink);border-color:var(--ink)}
-.size-opt .s-name{display:block;font-family:'Cormorant',serif;font-size:1.05rem;font-weight:400;color:var(--ink);margin-bottom:3px;transition:color .2s}
+.size-opt .s-name{display:block;font-family:'Fraunces',serif;font-size:1.05rem;font-weight:400;color:var(--ink);margin-bottom:3px;transition:color .2s}
 .size-opt .s-cm{display:block;font-size:.62rem;letter-spacing:.1em;color:var(--ink-soft);margin-bottom:6px;transition:color .2s}
 .size-opt .s-price{display:block;font-size:.7rem;color:var(--ink-mid);transition:color .2s}
 .size-opt.selected .s-name,.size-opt.selected .s-cm,.size-opt.selected .s-price{color:var(--card)}
 
 /* PHOTO UPLOAD */
 .photo-upload-area{border:1px dashed var(--line-med);padding:22px 16px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;position:relative}
-.photo-upload-area:hover{border-color:rgba(46,46,42,.5);background:rgba(46,46,42,.02)}
+.photo-upload-area:hover{border-color:rgba(30,58,43,.5);background:rgba(30,58,43,.02)}
 .photo-upload-area.has-files{border-color:var(--ink)}
 .upload-icon{font-size:1.4rem;margin-bottom:8px;display:block}
 .upload-label-text{font-size:.75rem;color:var(--ink-mid);letter-spacing:.05em;line-height:1.6}
@@ -104,7 +105,7 @@ textarea{resize:none;line-height:1.7;min-height:88px}
 
 /* CALENDAR */
 .cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
-.cal-month-label{font-family:'Cormorant',serif;font-weight:300;font-size:1.15rem;letter-spacing:.06em;color:var(--ink)}
+.cal-month-label{font-family:'Fraunces',serif;font-weight:300;font-size:1.15rem;letter-spacing:.06em;color:var(--ink)}
 .cal-arrow{background:none;border:1px solid var(--line);width:28px;height:28px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.75rem;color:var(--ink-mid);transition:all .2s}
 .cal-arrow:hover{border-color:var(--ink);color:var(--ink)}
 .cal-arrow:disabled{opacity:.3;cursor:not-allowed}
@@ -114,7 +115,7 @@ textarea{resize:none;line-height:1.7;min-height:88px}
 .cal-day.empty{pointer-events:none}
 .cal-day.closed{color:var(--line-med);pointer-events:none;text-decoration:line-through}
 .cal-day.available{cursor:pointer;color:var(--ink);border-color:var(--line)}
-.cal-day.available:hover{border-color:var(--ink);background:rgba(46,46,42,.04)}
+.cal-day.available:hover{border-color:var(--ink);background:rgba(30,58,43,.04)}
 .cal-day.selected{background:var(--ink);color:var(--card);border-color:var(--ink);cursor:pointer}
 .cal-day.today-dot::after{content:'';position:absolute;bottom:3px;left:50%;transform:translateX(-50%);width:3px;height:3px;border-radius:50%;background:var(--ink-soft)}
 .cal-day.selected.today-dot::after{background:var(--card);opacity:.5}
@@ -124,14 +125,14 @@ textarea{resize:none;line-height:1.7;min-height:88px}
 .cal-legend-dot.avail{border:1px solid var(--line-med)}
 .cal-legend-dot.sel{background:var(--ink)}
 .cal-legend-dot.closed{border:1px solid var(--line);opacity:.3}
-.cal-selected-display{margin-top:14px;padding:10px 14px;background:rgba(46,46,42,.05);font-size:.78rem;color:var(--ink-mid);letter-spacing:.04em;min-height:38px}
+.cal-selected-display{margin-top:14px;padding:10px 14px;background:rgba(30,58,43,.05);font-size:.78rem;color:var(--ink-mid);letter-spacing:.04em;min-height:38px}
 .cal-selected-display strong{color:var(--ink);font-weight:400}
 
 /* TIME SLOTS */
 .time-slots{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:4px}
 @media(max-width:400px){.time-slots{grid-template-columns:1fr 1fr}}
 .time-slot{border:1px solid var(--line);padding:10px 6px;text-align:center;cursor:pointer;font-size:.72rem;color:var(--ink-mid);letter-spacing:.04em;transition:all .15s}
-.time-slot:hover{border-color:rgba(46,46,42,.4);color:var(--ink)}
+.time-slot:hover{border-color:rgba(30,58,43,.4);color:var(--ink)}
 .time-slot.selected{background:var(--ink);border-color:var(--ink);color:var(--card)}
 .time-slot.unavail{opacity:.35;pointer-events:none;text-decoration:line-through}
 
@@ -142,10 +143,10 @@ textarea{resize:none;line-height:1.7;min-height:88px}
 /* PAYMENT */
 .pay-methods{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:24px}
 .pay-tab{border:1px solid var(--line);padding:14px;cursor:pointer;display:flex;align-items:center;gap:10px;transition:all .2s;background:transparent;width:100%;text-align:left}
-.pay-tab:hover{border-color:rgba(46,46,42,.4)}
-.pay-tab.active{border-color:var(--ink);background:rgba(46,46,42,.05)}
+.pay-tab:hover{border-color:rgba(30,58,43,.4)}
+.pay-tab.active{border-color:var(--accent);background:rgba(168,58,42,.06)}
 .pay-tab-icon{font-size:1.15rem;flex-shrink:0}
-.pay-tab-label{font-size:.78rem;color:var(--ink);display:block;font-weight:400;font-family:'Jost',sans-serif}
+.pay-tab-label{font-size:.78rem;color:var(--ink);display:block;font-weight:400;font-family:'Space Grotesk',sans-serif}
 .pay-tab-note{font-size:.62rem;color:var(--ink-soft);letter-spacing:.04em}
 .pay-panel{display:none;animation:stepIn .3s ease}
 .pay-panel.active{display:block}
@@ -155,28 +156,28 @@ textarea{resize:none;line-height:1.7;min-height:88px}
 
 /* QR */
 .qr-section{text-align:center;padding:8px 0 4px}
-.qr-amount-display{font-family:'Cormorant',serif;font-size:2rem;font-weight:300;letter-spacing:.04em;margin-bottom:4px}
+.qr-amount-display{font-family:'Fraunces',serif;font-size:2rem;font-weight:300;letter-spacing:.04em;margin-bottom:4px}
 .qr-subtitle{font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:20px}
 #qr-canvas-wrap{display:inline-block;background:var(--card);padding:16px;border:1px solid var(--line);margin-bottom:16px}
 #qr-canvas-wrap canvas{display:block}
 .qr-id-line{font-size:.72rem;color:var(--ink-mid);letter-spacing:.05em;margin-bottom:6px}
-.qr-steps{font-size:.73rem;color:var(--ink-soft);line-height:1.8;text-align:left;padding:14px 16px;background:rgba(46,46,42,.04);margin-bottom:20px}
+.qr-steps{font-size:.73rem;color:var(--ink-soft);line-height:1.8;text-align:left;padding:14px 16px;background:rgba(30,58,43,.04);margin-bottom:20px}
 .qr-steps strong{color:var(--ink-mid);font-weight:400;display:block;margin-bottom:3px}
 
 /* SUMMARY */
-.summary-block{background:var(--card2);padding:22px 24px;margin-bottom:24px}
-.sum-row{display:flex;justify-content:space-between;padding:6px 0;font-size:.8rem;color:var(--ink-mid);border-bottom:1px solid rgba(46,46,42,.07)}
+.summary-block{background:var(--card2);padding:22px 24px;margin-bottom:24px;border-radius:12px}
+.sum-row{display:flex;justify-content:space-between;padding:6px 0;font-size:.8rem;color:var(--ink-mid);border-bottom:1px solid rgba(30,58,43,.07)}
 .sum-row:last-of-type{border-bottom:none}
 .sum-row strong{color:var(--ink);font-weight:400}
-.sum-total{display:flex;justify-content:space-between;padding:14px 0 0;margin-top:8px;border-top:1px solid rgba(46,46,42,.2);font-size:.9rem}
+.sum-total{display:flex;justify-content:space-between;padding:14px 0 0;margin-top:8px;border-top:1px solid rgba(30,58,43,.2);font-size:.9rem}
 .sum-total strong{font-weight:400;font-size:1.05rem}
 
 /* BUTTONS */
 .btn-row{display:flex;align-items:center;gap:16px;margin-top:10px}
-.btn-next{background:var(--ink);color:var(--card);border:none;padding:13px 36px;font-family:'Jost',sans-serif;font-weight:300;font-size:.72rem;letter-spacing:.2em;text-transform:uppercase;cursor:pointer;transition:opacity .2s}
+.btn-next{background:var(--accent);color:#fffdf7;border:none;padding:13px 34px;border-radius:40px;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:opacity .2s}
 .btn-next:hover{opacity:.78}
 .btn-next:disabled{opacity:.45;cursor:not-allowed}
-.btn-back{background:none;border:none;font-family:'Jost',sans-serif;font-weight:300;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);cursor:pointer;padding:0;transition:color .2s}
+.btn-back{background:none;border:none;font-family:'Space Grotesk',sans-serif;font-weight:300;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);cursor:pointer;padding:0;transition:color .2s}
 .btn-back:hover{color:var(--ink)}
 .btn-spinner{display:none;width:12px;height:12px;border:1.5px solid rgba(237,234,222,.4);border-top-color:var(--card);border-radius:50%;animation:spin .7s linear infinite;margin-left:10px;vertical-align:middle}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -184,11 +185,11 @@ textarea{resize:none;line-height:1.7;min-height:88px}
 /* SUCCESS */
 .success{display:none;text-align:center;padding:20px 0;animation:stepIn .5s ease}
 .success.show{display:block}
-.success-mark{width:52px;height:52px;border:1px solid rgba(46,46,42,.3);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 24px;font-size:1.2rem}
-.success h2{font-family:'Cormorant',serif;font-weight:300;font-size:2rem;letter-spacing:.04em;text-transform:uppercase;margin-bottom:10px}
+.success-mark{width:52px;height:52px;border:1px solid rgba(30,58,43,.3);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 24px;font-size:1.2rem}
+.success h2{font-family:'Fraunces',serif;font-weight:400;font-size:1.9rem;letter-spacing:0;margin-bottom:10px;color:var(--ink)}
 .success p{font-size:.8rem;color:var(--ink-mid);line-height:1.8;max-width:360px;margin:0 auto 20px}
-.ref-badge{display:inline-block;border:1px solid rgba(46,46,42,.25);padding:9px 28px;font-family:'Cormorant',serif;font-size:1.1rem;letter-spacing:.18em;margin-bottom:28px}
-.btn-whatsapp{display:inline-flex;align-items:center;gap:8px;background:var(--ink);color:var(--card);padding:13px 32px;font-family:'Jost',sans-serif;font-weight:300;font-size:.72rem;letter-spacing:.2em;text-transform:uppercase;text-decoration:none;transition:opacity .2s}
+.ref-badge{display:inline-block;border:1px solid rgba(30,58,43,.25);padding:9px 28px;font-family:'Fraunces',serif;font-size:1.1rem;letter-spacing:.18em;margin-bottom:28px}
+.btn-whatsapp{display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:#fffdf7;padding:13px 30px;border-radius:40px;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;text-decoration:none;transition:opacity .2s}
 .btn-whatsapp:hover{opacity:.78}
 
 /* FOOTER */
@@ -199,22 +200,23 @@ textarea{resize:none;line-height:1.7;min-height:88px}
 
 <nav>
   <a href="https://sakstudio.art" class="nav-logo">
-    <img src="logo.png" alt="SAK Tattoo Studio" style="height:44px;width:auto;"/>
+    <img src="logo.png" alt="Sak Studio" style="height:40px;width:auto;"/>
+    <span class="nav-brand">Sak Studio</span>
   </a>
   <ul class="nav-links">
-    <li><a href="https://sakstudio.art">Home Page</a></li>
-    <li><a href="https://sakstudio.art/#why-us">Why us?</a></li>
-    <li><a href="https://sakstudio.art/#gallery">Tattoo Gallery</a></li>
-    <li><a href="https://sakstudio.art/#artists">Artists</a></li>
+    <li><a href="https://sakstudio.art">Home</a></li>
+    <li><a href="https://sakstudio.art/#why-us">Why Us</a></li>
+    <li><a href="https://sakstudio.art/#artists">Artists &amp; Work</a></li>
+    <li><a href="https://sakstudio.art/#faq">FAQ</a></li>
     <li><a href="#" class="active">Book Deposit</a></li>
   </ul>
 </nav>
 
 <div class="hero">
-  <p class="hero-eyebrow">SAK Tattoo Studio — Bangkok</p>
-  <h1>Book Your<br><em style="font-style:italic;font-weight:300;">Appointment</em></h1>
+  <p class="hero-eyebrow">Sak Studio — Bangkok</p>
+  <h1>Book your<br><em>appointment</em></h1>
   <div class="hero-divider"></div>
-  <p class="hero-sub">A 1,500 ฿ deposit reserves your slot and goes toward your final tattoo price. We will confirm via email within 12 hours.</p>
+  <p class="hero-sub">A 1,500 ฿ deposit reserves your slot and goes toward your final tattoo price. We&rsquo;ll confirm by email within 12 hours.</p>
 </div>
 
 <div class="form-outer">
@@ -408,7 +410,7 @@ textarea{resize:none;line-height:1.7;min-height:88px}
 
       <!-- Card panel -->
       <div class="pay-panel active" id="panel-card">
-        <div style="background:rgba(46,46,42,0.04);padding:20px;margin-bottom:20px;">
+        <div style="background:rgba(30,58,43,0.04);padding:20px;margin-bottom:20px;">
           <p style="font-size:0.78rem;color:var(--ink-mid);line-height:1.8;margin-bottom:16px;">
             You will be taken to <strong style="color:var(--ink);font-weight:400;">Stripe's secure checkout</strong> to pay your deposit. After payment, we will confirm your slot via email within 12 hours.
           </p>
@@ -467,9 +469,9 @@ textarea{resize:none;line-height:1.7;min-height:88px}
       <p id="success-msg">We will confirm your slot and payment details via email within 12 hours.</p>
 
       <!-- Payment confirmed box — shown for PromptPay -->
-      <div id="payment-confirmed-box" style="display:none;background:rgba(46,46,42,0.06);border:1px solid rgba(46,46,42,0.2);padding:20px 24px;margin:0 auto 24px;max-width:360px;text-align:left;">
+      <div id="payment-confirmed-box" style="display:none;background:rgba(30,58,43,0.06);border:1px solid rgba(30,58,43,0.2);padding:20px 24px;margin:0 auto 24px;max-width:360px;text-align:left;">
         <p style="font-size:0.72rem;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:10px;">Payment received</p>
-        <p style="font-family:'Cormorant',serif;font-size:1.5rem;font-weight:300;color:var(--ink);margin-bottom:4px;">✅ Screenshot submitted</p>
+        <p style="font-family:'Fraunces',serif;font-size:1.5rem;font-weight:300;color:var(--ink);margin-bottom:4px;">✅ Screenshot submitted</p>
         <p style="font-size:0.76rem;color:var(--ink-mid);line-height:1.8;">
           We will verify your transfer and confirm your slot via <strong style="font-weight:400;color:var(--ink);">email</strong> within 12 hours.
         </p>
@@ -491,8 +493,9 @@ textarea{resize:none;line-height:1.7;min-height:88px}
 </div>
 
 <div class="footer-note">
-  Good tattoo brings a good day<br>
-  <span style="letter-spacing:.02em;opacity:.6;">SAK Tattoo Studio · 247 S Sathon Rd, Bangkok · BTS Saphan Taksin Exit 4</span>
+  <span style="font-family:'Fraunces',serif;font-style:italic;font-size:1.15rem;color:var(--ink);letter-spacing:0;">Good tattoo brings a good day</span><br><br>
+  Sak Studio · 247 S Sathon Rd, Bangkok · 3 min from BTS Saphan Taksin, Exit 4<br>
+  <span style="letter-spacing:.02em;opacity:.65;">© 2026 Sak Studio (Sak Sin Co., Ltd.)</span>
 </div>
 
 <script>
