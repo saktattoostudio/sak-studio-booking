@@ -32,7 +32,12 @@ nav{position:sticky;top:0;z-index:100;display:flex;justify-content:space-between
 .nav-links a{font-family:'Space Grotesk',sans-serif;font-weight:400;font-size:.78rem;letter-spacing:.03em;color:#3f4f3b;text-decoration:none;transition:color .2s}
 .nav-links a:hover{color:var(--accent)}
 .nav-links a.active{color:#fffdf7;background:var(--accent);padding:9px 20px;border-radius:40px;font-weight:600}
-@media(max-width:720px){nav{padding:14px 24px}.nav-links{display:none}}
+@media(max-width:720px){
+  nav{padding:12px 20px;flex-wrap:wrap;gap:10px}
+  .nav-links{display:none;order:3;width:100%;justify-content:center;flex-wrap:wrap;gap:18px;margin-top:2px}
+  .nav-current{display:none}
+  body.nav-open .nav-links{display:flex}
+}
 
 /* HERO */
 .hero{position:relative;z-index:1;text-align:center;padding:48px 24px 40px}
@@ -196,7 +201,7 @@ textarea{resize:none;line-height:1.7;min-height:88px}
 .footer-note{text-align:center;padding:0 24px 48px;position:relative;z-index:1;font-size:.72rem;font-weight:300;color:var(--ink-soft);letter-spacing:.08em;line-height:1.8}
 </style>
 </head>
-<body>
+<body class="nav-open">
 
 <nav>
   <a href="https://sakstudio.art" class="nav-logo">
@@ -208,7 +213,7 @@ textarea{resize:none;line-height:1.7;min-height:88px}
     <li><a href="https://sakstudio.art/#why-us">Why Us</a></li>
     <li><a href="https://sakstudio.art/#artists">Artists &amp; Work</a></li>
     <li><a href="https://sakstudio.art/#faq">FAQ</a></li>
-    <li><a href="#" class="active">Book Deposit</a></li>
+    <li class="nav-current"><a href="#" class="active">Book Deposit</a></li>
   </ul>
 </nav>
 
@@ -486,7 +491,8 @@ textarea{resize:none;line-height:1.7;min-height:88px}
           📷 DM on Instagram
         </a>
       </div>
-      <p style="margin-top:24px;font-size:.7rem;color:var(--ink-soft);">247 S Sathon Rd, Yan Nawa, Bangkok · 3 min from BTS Saphan Taksin</p>
+      <a href="https://sakstudio.art" style="display:inline-block;margin-top:22px;font-size:0.78rem;font-weight:600;letter-spacing:0.03em;color:var(--accent);text-decoration:none;">&larr; Back to Sak Studio</a>
+      <p style="margin-top:18px;font-size:.7rem;color:var(--ink-soft);">247 S Sathon Rd, Yan Nawa, Bangkok · 3 min from BTS Saphan Taksin</p>
     </div>
 
   </div>
@@ -495,7 +501,7 @@ textarea{resize:none;line-height:1.7;min-height:88px}
 <div class="footer-note">
   <span style="font-family:'Fraunces',serif;font-style:italic;font-size:1.15rem;color:var(--ink);letter-spacing:0;">Good tattoo brings a good day</span><br><br>
   Sak Studio · 247 S Sathon Rd, Bangkok · 3 min from BTS Saphan Taksin, Exit 4<br>
-  <span style="letter-spacing:.02em;opacity:.65;">© 2026 Sak Studio (Sak Sin Co., Ltd.)</span>
+  <span style="letter-spacing:.02em;opacity:.65;">© 2024–2026 Sak Studio (Sak Sin Co., Ltd.)</span>
 </div>
 
 <script>
@@ -712,6 +718,7 @@ function showStep(n){
   document.querySelectorAll('.step').forEach(s=>s.classList.remove('active'));
   document.getElementById('step-'+n).classList.add('active');
   updateProgress(n);
+  document.body.classList.toggle('nav-open', n===0);
   window.scrollTo({top:0,behavior:'smooth'});
   if(n===2) calInit();
   if(n===3){ fillSummary(); if(selPay==='promptpay') buildPromptPayQR(); }
@@ -792,6 +799,7 @@ function showSuccess(ref,data,msgOverride){
   document.querySelectorAll('.step').forEach(s=>s.classList.remove('active'));
   document.getElementById('progress').style.opacity='0';
   document.getElementById('success').classList.add('show');
+  document.body.classList.add('nav-open');
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
